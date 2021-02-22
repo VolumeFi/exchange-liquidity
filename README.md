@@ -1,8 +1,12 @@
-# Uniswap Exchanage Add
-Liquidity Exchange and Add to any Uniswap Pool XXX/ETH from any ERC20 token and develped in Vyper.
+# DEX and AMM Add/Remove Contracts
+Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token and develped in Vyper.
 
-## Current Contract deployed at:
-[0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0xFd8A61F94604aeD5977B31930b48f1a94ff3a195)
+## Current Contracts deployed at:
+1. Uniswap Liquidity Add:
+  * [0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0xFd8A61F94604aeD5977B31930b48f1a94ff3a195)
+
+2. Curve Liquidity Add
+* [PENDING]
 
 ## Infura Key
 ```bash
