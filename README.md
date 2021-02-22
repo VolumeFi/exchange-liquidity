@@ -1,5 +1,8 @@
 # exchange-add
-Liquidity Exchange and Add to Pool
+Liquidity Exchange and Add to any Uniswap Pool XXX/ETH from any ERC20 token and develped in Vyper.
+
+# Current Contract deployed at:
+0xFd8A61F94604aeD5977B31930b48f1a94ff3a195
 
 ## Infura Key
 ```bash
