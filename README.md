@@ -25,3 +25,7 @@ brownie test -s
 ## Deployment
 ```bash
 brownie run deploy.py --network mainnet
+```
+
+# Fees
+This contract charges a flat, developer maintenance, transaction fee of 0.005ETH for any transaction greater than $5,000 USDC in value to help maintain and provide support for the contract and further improvements.
