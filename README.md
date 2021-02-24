@@ -3,7 +3,7 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
 
 ## Current Contracts deployed at:
 1. Uniswap Liquidity Add:
-  * [0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0xFd8A61F94604aeD5977B31930b48f1a94ff3a195)
+  * [0xe327518a50651D536D189562641aF128aFbEcF48](https://etherscan.io/address/0xe327518a50651D536D189562641aF128aFbEcF48)
 
 2. Curve Liquidity Add
 * [PENDING]
