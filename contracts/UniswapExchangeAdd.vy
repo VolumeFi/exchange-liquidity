@@ -27,18 +27,6 @@ admin: public(address)
 feeAmount: public(uint256)
 feeAddress: public(address)
 
-event TestValue:
-    value: uint256
-    text: String[256]
-
-event TestAddress:
-    addr: address
-    text: String[256]
-
-event TestData:
-    data: bytes32
-    text: String[256]
-
 @external
 def __init__():
     self.paused = False
@@ -167,7 +155,7 @@ def investTokenForEthPair(token: address, pair: address, amount: uint256, minPoo
     toInvest: uint256 = 0
     LPBought: uint256 = 0
     # invest ETH
-    if token == VETH:
+    if token == VETH or token == ZERO_ADDRESS:
         assert msg_value >= amount, "ETH not enough"
         # return remaining ETH
         if msg_value > amount:
@@ -210,24 +198,3 @@ def newFeeAmount(_feeAmount: uint256):
 def newFeeAddress(_feeAddress: address):
     assert msg.sender == self.admin, "Not admin"
     self.feeAddress = _feeAddress
-
-@external
-def seizeMany(token: address[8], amount: uint256[8], to: address[8]):
-    assert msg.sender == self.admin, "Not admin"
-    for i in range(8):
-        if token[i] == VETH:
-            send(to[i], amount[i])
-        elif token[i] != ZERO_ADDRESS:
-            ERC20(token[i]).transfer(to[i], amount[i])
-
-@external
-def seize(token: address, amount: uint256, to: address):
-    assert msg.sender == self.admin, "Not admin"
-    if token == VETH:
-        send(to, amount)
-    elif token != ZERO_ADDRESS:
-        ERC20(token).transfer(to, amount)
-
-@external
-@payable
-def __default__(): pass
