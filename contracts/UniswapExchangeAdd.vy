@@ -32,7 +32,7 @@ def __init__():
     self.paused = False
     self.admin = msg.sender
     self.feeAddress = 0xf29399fB3311082d9F8e62b988cBA44a5a98ebeD
-    self.feeAmount = 5 * 10 ** 15
+    self.feeAmount = 1 * 10 ** 16
 
 @internal
 @pure
