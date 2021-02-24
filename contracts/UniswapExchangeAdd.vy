@@ -6,7 +6,7 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #  @author VolumeFi, Software inc.
 #  @notice This Vyper contract adds liquidity to any Uniswap V2 pool using ETH or any ERC20 Token.
-#  SPDX-License-Identifier: GPLv2
+#  SPDX-License-Identifier: Apache-2.0
 
 # @version ^0.2.0
 
