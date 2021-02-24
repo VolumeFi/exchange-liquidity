@@ -198,3 +198,7 @@ def newFeeAmount(_feeAmount: uint256):
 def newFeeAddress(_feeAddress: address):
     assert msg.sender == self.admin, "Not admin"
     self.feeAddress = _feeAddress
+
+@external
+@payable
+def __default__(): pass
