@@ -1,13 +1,9 @@
 # Copyright (C) 2021 VolumeFi Software, Inc.
 
 #  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Apache 2.0 License as published at 
-#  https://github.com/VolumeFi/exchange-liquidity/blob/main/LICENSE
-# 
+#  it under the terms of the GNU Apache 2.0 License. 
 #  This program is distributed WITHOUT ANY WARRANTY without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# 
-#  See https://github.com/VolumeFi/exchange-liquidity/blob/main/LICENSE for more details
 #  @author VolumeFi, Software inc.
 #  @notice This Vyper contract adds liquidity to any Uniswap V2 pool using ETH or any ERC20 Token.
 #  SPDX-License-Identifier: GPLv2
