@@ -8,13 +8,11 @@ interface ERC20:
 interface UniswapV2Pair:
     def token0() -> address: view
     def token1() -> address: view
-    def getReserves() -> (uint256, uint256, uint256): view
 
 interface UniswapV2Router02:
     def removeLiquidity(tokenA: address, tokenB: address, liquidity: uint256, amountAMin: uint256, amountBMin: uint256, to: address, deadline: uint256) -> (uint256, uint256): nonpayable
 
 interface WrappedEth:
-    def deposit(): payable
     def withdraw(wad: uint256): nonpayable
 
 UNISWAPV2ROUTER02: constant(address) = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
