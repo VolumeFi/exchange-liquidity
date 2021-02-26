@@ -34,13 +34,6 @@ def __init__():
     self.feeAmount = 1 * 10 ** 16
 
 @internal
-@pure
-def _getPairTokens(pair: address) -> (address, address):
-    token0: address = UniswapV2Pair(pair).token0()
-    token1: address = UniswapV2Pair(pair).token1()
-    return (token0, token1)
-
-@internal
 def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, to: address, deadline: uint256) -> uint256:
     if fromToken == toToken:
         return tokens2Trade
