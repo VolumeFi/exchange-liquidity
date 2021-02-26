@@ -33,7 +33,7 @@ def __init__():
     self.paused = False
     self.admin = msg.sender
     self.feeAddress = 0xf29399fB3311082d9F8e62b988cBA44a5a98ebeD
-    self.feeAmount = 5 * 10 ** 15
+    self.feeAmount = 1 * 10 ** 16
 
 @internal
 @pure
@@ -65,7 +65,7 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, to
 @external
 @payable
 @nonreentrant('lock')
-def divest(pair: address, token: address, amount: uint256, deadline: uint256=MAX_UINT256) -> uint256:
+def divestEthPairToToken(pair: address, token: address, amount: uint256, deadline: uint256=MAX_UINT256) -> uint256:
     assert not self.paused, "Paused"
     fee: uint256 = self.feeAmount
     msg_value: uint256 = msg.value

@@ -28,7 +28,8 @@ brownie test -s
 
 ## Deployment
 ```bash
-brownie run deploy.py --network mainnet
+brownie run deploy_uni_add.py --network mainnet # UniswapExchangeAdd
+brownie run deploy_uni_remove.py --network mainnet # UniswapExchangeRemove
 ```
 
 ## Fees
