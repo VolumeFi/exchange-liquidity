@@ -1,11 +1,15 @@
 #!/usr/bin/python3
 
 import pytest, math
-from brownie import accounts, UniswapExchangeAdd, Contract
+from brownie import accounts, UniswapExchangeAdd, UniswapExchangeRemove, Contract
 
 @pytest.fixture(scope="session")
 def MyUniswapExchangeAdd():
     return UniswapExchangeAdd.deploy({'from':accounts[0]})
+
+@pytest.fixture(scope="session")
+def MyUniswapExchangeRemove():
+    return UniswapExchangeRemove.deploy({'from':accounts[0]})
 
 @pytest.fixture(scope="session")
 def UniswapV2Factory():
