@@ -1,3 +1,13 @@
+# Copyright (C) 2021 VolumeFi Software, Inc.
+
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the Apache 2.0 License. 
+#  This program is distributed WITHOUT ANY WARRANTY without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#  @author VolumeFi, Software inc.
+#  @notice This Vyper contract removes liquidity from any Uniswap V2 pool into ETH or any ERC20 Token.
+#  SPDX-License-Identifier: Apache-2.0
+
 # @version ^0.2.0
 
 interface ERC20:

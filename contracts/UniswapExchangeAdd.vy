@@ -1,7 +1,7 @@
 # Copyright (C) 2021 VolumeFi Software, Inc.
 
 #  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Apache 2.0 License. 
+#  it under the terms of the Apache 2.0 License. 
 #  This program is distributed WITHOUT ANY WARRANTY without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #  @author VolumeFi, Software inc.
