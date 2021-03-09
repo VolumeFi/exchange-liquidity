@@ -75,9 +75,16 @@ metaPool: public(HashMap[address, address]) # Curve meta Pools for deposit / wit
 underlyingAddPool: public(HashMap[address, bool]) # Curve Pools with add_liquidity including is_underlying parameter
 pausedPool: public(HashMap[address, bool]) # Pause protocol individual Curve Pool
 
-# token to token swap using Uniswap
 @internal
 def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, deadline: uint256) -> uint256:
+    """
+    @notice token to token swap using Uniswap
+    @param fromToken contract address of the offered token
+    @param toToken contract address of the desired toToken
+    @param token2Trade amount of fromToken
+    @param deadline timestamp after revert transaction
+    @return amount of toToken
+    """
     if fromToken == toToken:
         return tokens2Trade
     if ERC20(fromToken).allowance(self, UNISWAPV2ROUTER02) > 0:
@@ -97,9 +104,15 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, de
     assert tokenBought > 0, "Error Swapping Token 2"
     return tokenBought
 
-# eth to token swap using Uniswap
 @internal
 def _eth2Token(token: address, eth2Trade: uint256, deadline: uint256) -> uint256:
+    """
+    @notice eth to token swap using Uniswap
+    @param token contract address of the desired Token
+    @param eth2Trade amount of Ethereum
+    @param deadline timestamp after revert transaction
+    @return amount of toToken
+    """
     if token == VETH or token == ZERO_ADDRESS:
         return eth2Trade
     elif token == WETH:
@@ -109,9 +122,15 @@ def _eth2Token(token: address, eth2Trade: uint256, deadline: uint256) -> uint256
         WrappedEth(WETH).deposit(value=eth2Trade)
         return self._token2Token(WETH, token, eth2Trade, deadline)
 
-# token to Eth swap using Uniswap
 @internal
 def _token2Eth(token: address, amount: uint256, deadline: uint256) -> uint256:
+    """
+    @notice token to eth swap using Uniswap
+    @param token contract address of the desired Token
+    @param eth2Trade amount of Ethereum
+    @param deadline timestamp after revert transaction
+    @return amount of toToken
+    """
     if token == VETH or token == ZERO_ADDRESS:
         return amount
     elif token == WETH:
@@ -122,9 +141,15 @@ def _token2Eth(token: address, amount: uint256, deadline: uint256) -> uint256:
         WrappedEth(WETH).withdraw(tokenAmount)
         return tokenAmount
 
-# pulling token from sender
 @internal
 def _pullTokens(token: address, amount: uint256, sender: address, msg_value: uint256):
+    """
+    @notice pull token from sender
+    @param token contract address of the offered Token
+    @param amount amount of the offered Token
+    @param sender token sender address
+    @param msg_value remaining Eth amount
+    """
     if token == VETH or token == ZERO_ADDRESS:
         assert msg_value >= amount, "ETH not enough"
         if msg_value > amount:
@@ -134,9 +159,18 @@ def _pullTokens(token: address, amount: uint256, sender: address, msg_value: uin
         if msg_value > 0:
             send(sender, msg_value)
 
-# add liquidity to Curve pool
 @internal
 def _enterCurve(pool: address, entryToken: address, amount: uint256, index: uint256, tokenCount: uint256, lpToken: address) -> uint256:
+    """
+    @notice add liquidity to Curve pool
+    @param pool contract address of Curve pool
+    @param entryToken contract address to add liquidity
+    @param amount amount of entryToken
+    @param index index of entryToken in the pool
+    @param tokenCount number of coins of the pool
+    @param lpToken Curve LP token of the Pool
+    @return amount of minted lpToken
+    """
     if entryToken != ZERO_ADDRESS and entryToken != VETH:
         if ERC20(entryToken).allowance(self, pool) > 0:
             ERC20(entryToken).approve(pool, 0)
@@ -172,10 +206,19 @@ def _enterCurve(pool: address, entryToken: address, amount: uint256, index: uint
         raise "Token count error"
     return ERC20(lpToken).balanceOf(self)
 
-# get Curve Pool information from Curve Registry
 @internal
 @view
 def _getCurvePool(crvReg: address, swap: address, token: address) -> (address, address, uint256, uint256):
+    """
+    @notice get Curve Pool information from Curve Registry
+    @param crvReg contract address of Curve Registry
+    @param swap contract address of Curve pool
+    @param token contract address of offered token
+    @return pool contract address of Curve pool
+    @return entryToken contract address to add liquidity
+    @return tokenIndex index of entryToken in the pool
+    @return tokenCount number of coins of the pool
+    """
     pool: address = self.metaPool[swap]
     entryToken: address = token
     tokenIndex: uint256 = 0
@@ -200,9 +243,15 @@ def _getCurvePool(crvReg: address, swap: address, token: address) -> (address, a
             break
     return (pool, entryToken, tokenIndex, tokenCount)
 
-# get entry token amount to Curve pool
 @internal
 def _getEntryToken(token: address, entryToken: address, amount: uint256, deadline: uint256) -> uint256:
+    """
+    @notice get entry token amount to Curve pool
+    @param token contract address of the offered token
+    @param entryToken contract address to add liquidity
+    @param amount amount of the offered token
+    @return amount of the entryToken
+    """
     tokenAmount: uint256 = amount
     if token == entryToken:
         return tokenAmount
@@ -303,6 +352,15 @@ def __init__():
 @payable
 @nonreentrant('lock')
 def investTokenForCrvPair(token: address, amount: uint256, swap: address, minPoolTokens: uint256, deadline: uint256=DEADLINE) -> uint256:
+    """
+    @notice invest token / Eth for Curve Liquidity Provider pools
+    @param token contract address of the offered Token
+    @param amount amount of the offered Token
+    @param swap contract address of Curve pool
+    @param minPoolTokens minimum lptoken amount to succeed transaction
+    @param deadline timestamp after revert transaction
+    @return amount of lpToken to investor
+    """
     assert self.pausedPool[swap] == False, "Paused Pair"
     assert self.paused == False, "Paused"
     crvReg: address = self.crvRegistry
