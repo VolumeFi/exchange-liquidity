@@ -18,33 +18,39 @@ interface CrvRegistry:
     def get_underlying_coins(_pool: address) -> address[8]: view
     def get_lp_token(_pool: address) -> address: view
 
-# 4, 3, 2 token Curve Pool interface for add_liquidity including is_underlying parameter
+# 4-token-Curve Pool interface for add_liquidity including is_underlying parameter
 interface CurveUnderlyingAdd4Pool:
     def add_liquidity(_amounts: uint256[4], _min_amount: uint256, _is_underlying: bool): nonpayable
 
+# 3-token-Curve Pool interface for add_liquidity including is_underlying parameter
 interface CurveUnderlyingAdd3Pool:
     def add_liquidity(_amounts: uint256[3], _min_amount: uint256, _is_underlying: bool): nonpayable
 
+# 2-token-Curve Pool interface for add_liquidity including is_underlying parameter
 interface CurveUnderlyingAdd2Pool:
     def add_liquidity(_amounts: uint256[2], _min_amount: uint256, _is_underlying: bool): nonpayable
 
-# 4, 3, 2 token Curve Pool interface for add_liquidity
+# 4-token Curve Pool interface for add_liquidity
 interface Curve4Pool:
     def add_liquidity(_amounts: uint256[4], _min_amount: uint256): nonpayable
 
+# 3-token Curve Pool interface for add_liquidity
 interface Curve3Pool:
     def add_liquidity(_amounts: uint256[3], _min_amount: uint256): nonpayable
 
+# 2-token Curve Pool interface for add_liquidity
 interface Curve2Pool:
     def add_liquidity(_amounts: uint256[2], _min_amount: uint256): nonpayable
 
-# 4, 3, 2 token Curve Pool interface for add_liquidity including ETH as coin
+# 4-token-Curve Pool interface for add_liquidity including ETH as coin
 interface CurveEth4Pool:
     def add_liquidity(_amounts: uint256[4], _min_amount: uint256): payable
 
+# 3-token-Curve Pool interface for add_liquidity including ETH as coin
 interface CurveEth3Pool:
     def add_liquidity(_amounts: uint256[3], _min_amount: uint256): payable
 
+# 2-token-Curve Pool interface for add_liquidity including ETH as coin
 interface CurveEth2Pool:
     def add_liquidity(_amounts: uint256[2], _min_amount: uint256): payable
 
