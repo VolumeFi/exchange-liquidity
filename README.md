@@ -22,6 +22,14 @@ input private key and password
 
 
 ## Test
+Run ganache-cli mainnet fork
+
+```bash
+ganache-cli --fork https://mainnet.infura.io/v3/#{YOUR_INFURA_KEY} -p 7545 -e 10000
+```
+
+Run brownie test
+
 ```bash
 brownie test -s
 ```
