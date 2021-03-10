@@ -304,7 +304,6 @@ def __init__():
     self.metaPool[0x42d7025938bEc20B69cBae5A77421082407f053A] = 0x3c8cAee4E09296800f8D29A68Fa3837e2dae4940 # steth
 
     # Curve Pools with add_liquidity including is_underlying parameter
-    self.underlyingAddPool[0xA2B47E3D5c44877cca798226B7B8118F9BFb7A56] = True # Compound
     self.underlyingAddPool[0xDeBF20617708857ebe4F679508E7b7863a8A8EeE] = True # aave
     self.underlyingAddPool[0xEB16Ae0052ed37f479f7fe63849198Df1765a733] = True # saave
     self.underlyingAddPool[0x2dded6Da1BF5DBdF597C45fcFaa3194e53EcfeAF] = True # ironbank
