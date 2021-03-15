@@ -5,7 +5,7 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
 1. Uniswap Liquidity:
   * Add: [0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0xFd8A61F94604aeD5977B31930b48f1a94ff3a195)
 
-  * Remove: [0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92)
+  * Remove: [0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92](https://etherscan.io/address/0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92)
 
 
 2. Curve Liquidity Add
