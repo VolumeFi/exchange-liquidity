@@ -2,8 +2,11 @@
 Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token and develped in Vyper.
 
 ## Current Contracts deployed at:
-1. Uniswap Liquidity Add:
-  * [0xe327518a50651D536D189562641aF128aFbEcF48](https://etherscan.io/address/0xe327518a50651D536D189562641aF128aFbEcF48)
+1. Uniswap Liquidity:
+  * Add: [0xe327518a50651D536D189562641aF128aFbEcF48](https://etherscan.io/address/0xe327518a50651D536D189562641aF128aFbEcF48)
+
+  * Remove: [0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92](https://etherscan.io/address/0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92)
+
 
 2. Curve Liquidity Add
 * [PENDING]
