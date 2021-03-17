@@ -7,13 +7,13 @@ from hypothesis import HealthCheck
 class StateMachine:
 
     coin = strategy('uint16', max_value=6)
-    valueEth = strategy('uint256', min_value=1 * 10 ** 17, max_value=1 * 10 ** 18)
-    valueUSD6 = strategy('uint256', min_value=100 * 10 ** 6, max_value=1000 * 10 ** 6)
-    valueUSD18 = strategy('uint256', min_value=100 * 10 ** 18, max_value=1000 * 10 ** 18)
-    valueBTC = strategy('uint256', min_value=1 * 10 ** 6, max_value=1 * 10 ** 7)
+    valueEth = strategy('uint256', min_value=9 * 10 ** 17, max_value=11 * 10 ** 17)
+    valueUSD6 = strategy('uint256', min_value=900 * 10 ** 6, max_value=1100 * 10 ** 6)
+    valueUSD18 = strategy('uint256', min_value=900 * 10 ** 18, max_value=1100 * 10 ** 18)
+    valueBTC = strategy('uint256', min_value=9 * 10 ** 6, max_value=11 * 10 ** 6)
     pool = strategy('uint16', max_value=31)
 
-    def __init__(self, MyCurveExchangeAdd, UniswapV2Router02, DAI, USDC, USDT, WETH, WBTC, accounts, Contract):
+    def __init__(self, MyCurveExchangeAdd, MyCurveExchangeRemove, UniswapV2Router02, DAI, USDC, USDT, WETH, WBTC, accounts, Contract):
         self.coins = [
             "0x0000000000000000000000000000000000000000",
             "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
@@ -92,6 +92,7 @@ class StateMachine:
             "0xcee60cFa923170e4f8204AE08B4fA6A3F5656F3a",        
         ]
         self.MyCurveExchangeAdd = MyCurveExchangeAdd
+        self.MyCurveExchangeRemove = MyCurveExchangeRemove
         self.accounts = accounts
         self.Contract = Contract
         UniswapV2Router02.swapETHForExactTokens(40000 * 10 ** 6, [WETH, USDC], accounts[0], 2 ** 256 - 1, {"from":accounts[0], "value": 100 * 10 ** 18})
@@ -116,13 +117,22 @@ class StateMachine:
             self.coins[coin].approve(self.MyCurveExchangeAdd, values[coin], {"from": accounts[0]})
             self.MyCurveExchangeAdd.investTokenForCrvPair(self.coins[coin], values[coin], self.pools[pool], 1, 2 ** 256 - 1, {"from":accounts[0], "value": 1 * 10 ** 16})
             print("Test pool " + str(pool) + "\ncoin " + str(coin))
+            print("Token Amount: " + str(self.coins[coin].balanceOf(accounts[0])))
             print("CrvLPToken : " + str(lpToken.balanceOf(accounts[0])))
+            lpToken.approve(self.MyCurveExchangeRemove, lpToken.balanceOf(accounts[0]), {"from":accounts[0]})
+            self.MyCurveExchangeRemove.divestTokenForCrvPair(lpToken, lpToken.balanceOf(accounts[0]), self.coins[coin], 1, {"from":accounts[0], "value":1 * 10 ** 16})
+            print("Token Amount: " + str(self.coins[coin].balanceOf(accounts[0])))
+            print("CrvLPTokenAfterRemove : " + str(lpToken.balanceOf(accounts[0])))
         else:
             self.MyCurveExchangeAdd.investTokenForCrvPair(self.coins[coin], values[coin], self.pools[pool], 1, 2 ** 256 - 1, {"from":accounts[0], "value": values[coin] + 1 * 10 ** 16})
             print("Test pool " + str(pool) + "\ncoin " + str(coin))
+            print("Token Amount: " + str(accounts[0].balance()))
             print("CrvLPToken : " + str(lpToken.balanceOf(accounts[0])))
+            lpToken.approve(self.MyCurveExchangeRemove, lpToken.balanceOf(accounts[0]), {"from":accounts[0]})
+            self.MyCurveExchangeRemove.divestTokenForCrvPair(lpToken, lpToken.balanceOf(accounts[0]), self.coins[coin], 1, {"from":accounts[0], "value":1 * 10 ** 16})
+            print("Token Amount: " + str(accounts[0].balance()))
+            print("CrvLPTokenAfterRemove : " + str(lpToken.balanceOf(accounts[0])))
 
-
-def test_main(MyCurveExchangeAdd, UniswapV2Router02, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, state_machine):
+def test_main(MyCurveExchangeAdd, MyCurveExchangeRemove, UniswapV2Router02, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, state_machine):
     settings = {"suppress_health_check": HealthCheck.all(), "max_examples": 20}
-    state_machine(StateMachine, MyCurveExchangeAdd, UniswapV2Router02, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, settings=settings)
+    state_machine(StateMachine, MyCurveExchangeAdd, MyCurveExchangeRemove, UniswapV2Router02, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, settings=settings)
