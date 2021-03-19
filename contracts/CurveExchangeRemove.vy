@@ -1,3 +1,5 @@
+# Copyright (C) 2021 VolumeFi Software, Inc.
+
 # @version ^0.2.0
 
 interface ERC20:
