@@ -159,7 +159,7 @@ def _getExitToken(exitToken: address, exitMidToken: address, deadline: uint256) 
 @external
 def __init__():
     self.admin = msg.sender
-    self.feeAmount = 5 * 10 ** 15
+    self.feeAmount = 1 * 10 ** 16
     self.feeAddress = 0xf29399fB3311082d9F8e62b988cBA44a5a98ebeD
     self.crvRegistry = 0x7D86446dDb609eD0F5f8684AcF30380a356b2B4c
 
