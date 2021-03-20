@@ -8,8 +8,11 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
   * Remove: [0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92](https://etherscan.io/address/0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92)
 
 
-2. Curve Liquidity Add
-* [PENDING]
+2. Curve Liquidity Add via Uniswap
+  * Add: [0x6fC92B10f8f3b2247CbAbF5843F9499719b0653C](https://etherscan.io/address/0x6fC92B10f8f3b2247CbAbF5843F9499719b0653C)
+
+  * Remove: [0xb833600aEbcC3FAb87d0116a8b1716f2a335bB95](https://etherscan.io/address/0xb833600aEbcC3FAb87d0116a8b1716f2a335bB95)
+
 
 ## Infura Key
 ```bash
