@@ -12,7 +12,7 @@ class StateMachine:
     valueUSD18 = strategy('uint256', min_value=900 * 10 ** 18, max_value=1100 * 10 ** 18)
     valueBTC = strategy('uint256', min_value=9 * 10 ** 6, max_value=11 * 10 ** 6)
 
-    def __init__(self, MySushiswapExchangeAdd, MySushiswapExchangeRemove, SushiswapRouter, SushiswapFactory, DAI, USDC, USDT, WETH, WBTC, accounts, Contract):
+    def __init__(self, MySushiswapExchangeAdd, SushiswapRouter, SushiswapFactory, DAI, USDC, USDT, WETH, WBTC, accounts, Contract):
         self.coins = [
             "0x0000000000000000000000000000000000000000",
             "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
@@ -23,7 +23,6 @@ class StateMachine:
             WBTC
         ]
         self.MySushiswapExchangeAdd = MySushiswapExchangeAdd
-        self.MySushiswapExchangeRemove = MySushiswapExchangeRemove
         self.SushiswapFactory = SushiswapFactory
         self.accounts = accounts
         self.Contract = Contract
@@ -94,6 +93,6 @@ class StateMachine:
             print(SushiswapPair.balanceOf(accounts[0]))
             print("Test coin " + str(coin))
 
-def test_main(MySushiswapExchangeAdd, MySushiswapExchangeRemove, SushiswapRouter, SushiswapFactory, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, state_machine):
+def test_main(MySushiswapExchangeAdd, SushiswapRouter, SushiswapFactory, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, state_machine):
     settings = {"suppress_health_check": HealthCheck.all(), "max_examples": 20}
-    state_machine(StateMachine, MySushiswapExchangeAdd, MySushiswapExchangeRemove, SushiswapRouter, SushiswapFactory, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, settings=settings)
+    state_machine(StateMachine, MySushiswapExchangeAdd, SushiswapRouter, SushiswapFactory, DAI, USDC, USDT, WETH, WBTC, accounts, Contract, settings=settings)
