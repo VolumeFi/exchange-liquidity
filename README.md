@@ -18,6 +18,12 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
   * Remove: [0xb833600aEbcC3FAb87d0116a8b1716f2a335bB95](https://etherscan.io/address/0xb833600aEbcC3FAb87d0116a8b1716f2a335bB95)
 
 
+3. Sushiswap Liquidity Add via Sushiswap
+  * Add: [0xe5826517134241278b6D372D1dA9f66D07190612](https://etherscan.io/address/0xe5826517134241278b6D372D1dA9f66D07190612)
+
+  * Remove: [](https://etherscan.io/address/0xb833600aEbcC3FAb87d0116a8b1716f2a335bB95)
+
+
 ## Infura Key
 ```bash
 export WEB3_INFURA_PROJECT_ID=${YOUR_INFURA_KEY}
@@ -48,6 +54,8 @@ brownie test -s
 ```bash
 brownie run deploy_uni_add.py --network mainnet # UniswapExchangeAdd
 brownie run deploy_uni_remove.py --network mainnet # UniswapExchangeRemove
+brownie run deploy_sushi_add.py --network mainnet # SushiSwapExchangeAdd
+brownie run deploy_sushi_remove.py --network mainnet # SushiSwapExchangeRemove
 ```
 
 ## Fees
