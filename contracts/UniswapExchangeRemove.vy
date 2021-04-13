@@ -106,7 +106,7 @@ def _getMidToken(midToken: address, token0: address, token1: address) -> address
 @external
 @payable
 @nonreentrant('lock')
-def divestUniPairToToken(pair: address, token: address, amount: uint256, deadline: uint256=MAX_UINT256) -> uint256:
+def divestUniPairToToken(pair: address, token: address, amount: uint256, minTokenAmount: uint256, deadline: uint256=MAX_UINT256) -> uint256:
     assert not self.paused, "Paused"
     fee: uint256 = self.feeAmount
     msg_value: uint256 = msg.value
@@ -131,10 +131,12 @@ def divestUniPairToToken(pair: address, token: address, amount: uint256, deadlin
     if token == token0:
         tokenAmount = token0Amount + self._token2Token(token1, token0, token1Amount, self, deadline)
         ERC20(token).transfer(msg.sender, tokenAmount)
+        assert tokenAmount >= minTokenAmount, "High Slippage"
         return tokenAmount
     elif token == token1:
         tokenAmount = token1Amount + self._token2Token(token0, token1, token0Amount, self, deadline)
         ERC20(token).transfer(msg.sender, tokenAmount)
+        assert tokenAmount >= minTokenAmount, "High Slippage"
         return tokenAmount
     elif token0 == WETH:
         tokenAmount = token0Amount + self._token2Token(token1, token0, token1Amount, self, deadline)
@@ -151,12 +153,16 @@ def divestUniPairToToken(pair: address, token: address, amount: uint256, deadlin
         tokenAmount = self._token2Token(midToken, WETH, tokenAmount, self, deadline)
     if token == WETH:
         ERC20(WETH).transfer(msg.sender, tokenAmount)
+        assert tokenAmount >= minTokenAmount, "High Slippage"
         return tokenAmount
     if token == VETH or token == ZERO_ADDRESS:
         WrappedEth(WETH).withdraw(tokenAmount)
+        assert tokenAmount >= minTokenAmount, "High Slippage"
         send(msg.sender, tokenAmount)
         return tokenAmount
-    return self._token2Token(WETH, token, tokenAmount, msg.sender, deadline)
+    tokenAmount = self._token2Token(WETH, token, tokenAmount, msg.sender, deadline)
+    assert tokenAmount >= minTokenAmount, "High Slippage"
+    return tokenAmount
 
 @external
 @nonreentrant('lock')
