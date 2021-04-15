@@ -2,9 +2,6 @@
 
 interface ERC20:
     def allowance(owner: address, spender: address) -> uint256: view
-    def approve(spender: address, amount: uint256) -> bool: nonpayable
-    def transfer(recipient: address, amount: uint256): nonpayable
-    def transferFrom(sender: address, recipient: address, amount: uint256): nonpayable
 
 interface BFactory:
     def isBPool(b: address) -> bool: view
@@ -12,12 +9,6 @@ interface BFactory:
 interface BPool:
     def joinswapExternAmountIn(tokenIn: address, tokenAmountIn: uint256, minPoolAmountOut: uint256) -> uint256: payable
     def isBound(t: address) -> bool: view
-    def totalSupply() -> uint256: view
-    def getDenormalizedWeight(token: address) -> uint256: view
-    def getTotalDenormalizedWeight() -> uint256: view
-    def getSwapFee() -> uint256: view
-    def calcPoolOutGivenSingleIn(tokenBalanceIn: uint256, tokenWeightIn: uint256, poolSupply: uint256, totalWeight: uint256, tokenAmountIn: uint256, swapFee: uint256) -> uint256: pure
-    def getBalance(token: address) -> uint256: view
     def getNumTokens() -> uint256: view
 
 interface UniswapV2Factory:
@@ -43,6 +34,7 @@ BALANCERFACTORY: constant(address) = 0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd
 VETH: constant(address) = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
 WETH: constant(address) = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
 DEADLINE: constant(uint256) = MAX_UINT256 # change
+
 TRANSFERFROM_MID: constant(Bytes[4]) = method_id("transferFrom(address,address,uint256)")
 TRANSFER_MID: constant(Bytes[4]) = method_id("transfer(address,uint256)")
 APPROVE_MID: constant(Bytes[4]) = method_id("approve(address,uint256)")
@@ -74,9 +66,9 @@ def _enter2Balancer(_toBalancerPoolAddress: address, _fromTokenContractAddress: 
                 convert(0, bytes32)
             ),
             max_outsize=32
-        )  # dev: failed transfer
+        )  # dev: failed approve
         if len(_response32) > 0:
-            assert convert(_response32, bool), "Approve failed"  # dev: failed transfer
+            assert convert(_response32, bool), "Approve failed"  # dev: failed approve
     _response32 = raw_call(
         _fromTokenContractAddress,
         concat(
@@ -85,9 +77,9 @@ def _enter2Balancer(_toBalancerPoolAddress: address, _fromTokenContractAddress: 
             convert(tokens2Trade, bytes32)
         ),
         max_outsize=32
-    )  # dev: failed transfer
+    )  # dev: failed approve
     if len(_response32) > 0:
-        assert convert(_response32, bool), "Approve failed"  # dev: failed transfer
+        assert convert(_response32, bool), "Approve failed"  # dev: failed approve
     poolTokensOut: uint256 = BPool(_toBalancerPoolAddress).joinswapExternAmountIn(_fromTokenContractAddress, tokens2Trade, 1)
     assert poolTokensOut > 0, "Error in entering balancer pool"
     return poolTokensOut
@@ -142,9 +134,8 @@ def _getMidTokenNumber(midToken: address, tokens: address[8]) -> uint256:
 def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, deadline: uint256) -> uint256:
     if fromToken == toToken:
         return tokens2Trade
-    allowance: uint256 = ERC20(fromToken).allowance(self, UNISWAPV2ROUTER02)
     _response32: Bytes[32] = empty(Bytes[32])
-    if allowance > 0:
+    if ERC20(fromToken).allowance(self, UNISWAPV2ROUTER02) > 0:
         _response32 = raw_call(
             fromToken,
             concat(
@@ -153,9 +144,9 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, de
                 convert(0, bytes32)
             ),
             max_outsize=32
-        )  # dev: failed transfer
+        )  # dev: failed approve
         if len(_response32) > 0:
-            assert convert(_response32, bool), "Approve failed"  # dev: failed transfer
+            assert convert(_response32, bool), "Approve failed"  # dev: failed approve
     _response32 = raw_call(
         fromToken,
         concat(
@@ -164,9 +155,9 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, de
             convert(tokens2Trade, bytes32)
         ),
         max_outsize=32
-    )  # dev: failed transfer
+    )  # dev: failed approve
     if len(_response32) > 0:
-        assert convert(_response32, bool), "Approve failed"  # dev: failed transfer
+        assert convert(_response32, bool), "Approve failed"  # dev: failed approve
     
     addrBytes: Bytes[288] = concat(convert(tokens2Trade, bytes32), convert(0, bytes32), convert(160, bytes32), convert(self, bytes32), convert(deadline, bytes32), convert(2, bytes32), convert(fromToken, bytes32), convert(toToken, bytes32))
     funcsig: Bytes[4] = SWAPETFT_MID
@@ -294,7 +285,17 @@ def batchWithdraw(token: address[8], amount: uint256[8], to: address[8]):
         if token[i] == VETH:
             send(to[i], amount[i])
         elif token[i] != ZERO_ADDRESS:
-            ERC20(token[i]).transfer(to[i], amount[i])
+            _response32: Bytes[32] = raw_call(
+                token[i],
+                concat(
+                    TRANSFER_MID,
+                    convert(to[i], bytes32),
+                    convert(amount[i], bytes32),
+                ),
+                max_outsize=32
+            )  # dev: failed transfer
+            if len(_response32) > 0:
+                assert convert(_response32, bool), "Transfer failed"  # dev: failed transfer
 
 @external
 @nonreentrant('lock')
@@ -303,7 +304,17 @@ def withdraw(token: address, amount: uint256, to: address):
     if token == VETH:
         send(to, amount)
     elif token != ZERO_ADDRESS:
-        ERC20(token).transfer(to, amount)
+        _response32: Bytes[32] = raw_call(
+            token,
+            concat(
+                TRANSFER_MID,
+                convert(to, bytes32),
+                convert(amount, bytes32),
+            ),
+            max_outsize=32
+        )  # dev: failed transfer
+        if len(_response32) > 0:
+            assert convert(_response32, bool), "Transfer failed"  # dev: failed transfer
 
 @external
 @payable
