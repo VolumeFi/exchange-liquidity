@@ -24,6 +24,12 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
   * Remove: [0x972b0Ff06c7c8e03468d841973cBB3578b6a7299](https://etherscan.io/address/0x972b0Ff06c7c8e03468d841973cBB3578b6a7299)
 
 
+4. Balancer Liquidity Add via Balancer
+  * Add: [0xe05b4871fDB9eAC749f4B809f600B74dF5B2b118](https://etherscan.io/address/0xe05b4871fDB9eAC749f4B809f600B74dF5B2b118)
+
+  * Remove: [](https://etherscan.io/address/)
+
+
 ## Infura Key
 ```bash
 export WEB3_INFURA_PROJECT_ID=${YOUR_INFURA_KEY}
