@@ -42,9 +42,6 @@ event Paused:
 event FeeChanged:
     newFee: uint256
 
-event Log:
-    data: bytes32
-
 NONFUNGIBLEPOSITIONMANAGER: constant(address) = 0x048A595f1605BdC9732eBb967a1B9d9D9EE7E6Ff # mainnet address?
 
 VETH: constant(address) = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
@@ -149,7 +146,7 @@ def addLiquidity(_tokenId: uint256, sender: address, uniV3Params: MintParams):
             max_outsize=32
         )
         assert convert(convert(_response32, bytes32), address) != ZERO_ADDRESS, "Create Or Init Pool failed"
-        log Log(convert(NONFUNGIBLEPOSITIONMANAGER, bytes32))
+
         _response128: Bytes[128] = raw_call(
             NONFUNGIBLEPOSITIONMANAGER,
             concat(
