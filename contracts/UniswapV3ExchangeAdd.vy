@@ -14,8 +14,6 @@ struct MintParams:
     deadline: uint256
 
 struct ModifyParams:
-    token0: address
-    token1: address
     fee: uint256
     tickLower: int128
     tickUpper: int128
@@ -240,7 +238,6 @@ def addLiquidityForUniV3(_tokenId: uint256, uniV3Params: MintParams):
 @nonreentrant('lock')
 def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
     assert _tokenId != 0, "Wrong Token ID"
-    assert convert(modifyParams.token0, uint256) < convert(modifyParams.token1, uint256), "Unsorted tokens"
 
     fee: uint256 = self.feeAmount
     if msg.value > fee:
@@ -261,6 +258,8 @@ def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
         max_outsize=384,
         is_static_call=True
     )
+    token0: address = convert(convert(slice(_response384, 64, 32), uint256), address)
+    token1: address = convert(convert(slice(_response384, 96, 32), uint256), address)
     liquidity: uint256 = convert(slice(_response384, 224, 32), uint256)
     
     _response64: Bytes[64] = raw_call(
@@ -296,8 +295,8 @@ def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
         NONFUNGIBLEPOSITIONMANAGER,
         concat(
             CAIPIN_MID,
-            convert(modifyParams.token0, bytes32),
-            convert(modifyParams.token1, bytes32),
+            convert(token0, bytes32),
+            convert(token1, bytes32),
             convert(modifyParams.fee, bytes32),
             convert(2 ** 96 * self.uintSqrt(amount0) / self.uintSqrt(amount1), bytes32)
         ),
@@ -306,15 +305,15 @@ def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
 
     assert convert(convert(_response32, bytes32), address) != ZERO_ADDRESS, "Create Or Init Pool failed"
 
-    self.safeApprove(modifyParams.token0, NONFUNGIBLEPOSITIONMANAGER, amount0)
-    self.safeApprove(modifyParams.token1, NONFUNGIBLEPOSITIONMANAGER, amount1)
+    self.safeApprove(token0, NONFUNGIBLEPOSITIONMANAGER, amount0)
+    self.safeApprove(token1, NONFUNGIBLEPOSITIONMANAGER, amount1)
 
     _response128: Bytes[128] = raw_call(
         NONFUNGIBLEPOSITIONMANAGER,
         concat(
             MINT_MID,
-            convert(modifyParams.token0, bytes32),
-            convert(modifyParams.token1, bytes32),
+            convert(token0, bytes32),
+            convert(token1, bytes32),
             convert(modifyParams.fee, bytes32),
             convert(modifyParams.tickLower, bytes32),
             convert(modifyParams.tickUpper, bytes32),
@@ -333,11 +332,11 @@ def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
     amount1new: uint256 = convert(slice(_response128, 96, 32), uint256)
 
     if amount0 > amount0new:
-        self.safeTransfer(modifyParams.token0, msg.sender, amount0 - amount0new)
-        self.safeApprove(modifyParams.token0, NONFUNGIBLEPOSITIONMANAGER, 0)
+        self.safeTransfer(token0, msg.sender, amount0 - amount0new)
+        self.safeApprove(token0, NONFUNGIBLEPOSITIONMANAGER, 0)
     if amount1 > amount1new:
-        self.safeTransfer(modifyParams.token1, msg.sender, amount1 - amount1new)
-        self.safeApprove(modifyParams.token1, NONFUNGIBLEPOSITIONMANAGER, 0)
+        self.safeTransfer(token1, msg.sender, amount1 - amount1new)
+        self.safeApprove(token1, NONFUNGIBLEPOSITIONMANAGER, 0)
     log NFLPModified(_tokenId, tokenId)
 
 # Admin functions

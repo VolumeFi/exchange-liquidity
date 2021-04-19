@@ -163,7 +163,7 @@ def test_main(DAI_R, WETH_R, accounts, Contract):
     print(WETH.balanceOf(MyNonfungiblePositionManager))
     print(DAI.balanceOf(MyNonfungiblePositionManager))
 
-    modifyParams = [WETH, DAI, 3000, 75480, 77820, accounts[0], 2 ** 256 - 1]
+    modifyParams = [3000, 75480, 77820, accounts[0], 2 ** 256 - 1]
     print("-----STEP9-----")
     MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeAdd, token_id_1, {'from': accounts[0]})
     MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_1, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
