@@ -67,10 +67,10 @@ brownie run deploy_uni_add.py --network mainnet # UniswapExchangeAdd
 brownie run deploy_uni_remove.py --network mainnet # UniswapExchangeRemove
 brownie run deploy_sushi_add.py --network mainnet # SushiSwapExchangeAdd
 brownie run deploy_sushi_remove.py --network mainnet # SushiSwapExchangeRemove
-brownie run deploy_curve_add.py --network mainnet # SushiSwapExchangeAdd
-brownie run deploy_curve_remove.py --network mainnet # SushiSwapExchangeRemove
-brownie run deploy_balancer_add.py --network mainnet # SushiSwapExchangeAdd
-brownie run deploy_balancer_remove.py --network mainnet # SushiSwapExchangeRemove
+brownie run deploy_curve_add.py --network mainnet # CurveExchangeAdd
+brownie run deploy_curve_remove.py --network mainnet # CurveExchangeRemove
+brownie run deploy_balancer_add.py --network mainnet # BalancerExchangeAdd
+brownie run deploy_balancer_remove.py --network mainnet # BalancerExchangeRemove
 brownie run deploy_univ3_add.py --network rinkeby # UniswapV3ExchangeAdd for Rinkeby
 ```
 
