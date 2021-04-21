@@ -1,13 +1,3 @@
-# Copyright (C) 2021 VolumeFi Software, Inc.
-
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the Apache 2.0 License. 
-#  This program is distributed WITHOUT ANY WARRANTY without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#  @author VolumeFi, Software inc.
-#  @notice This Vyper contract Adds liquidity to any Balancer pool from ETH or any ERC20 Token.
-#  SPDX-License-Identifier: Apache-2.0
-
 # @version 0.2.12
 
 interface ERC20:
@@ -17,17 +7,22 @@ interface BFactory:
     def isBPool(b: address) -> bool: view
 
 interface BPool:
-    def joinswapExternAmountIn(tokenIn: address, tokenAmountIn: uint256, minPoolAmountOut: uint256) -> uint256: payable
+    def exitswapPoolAmountIn(tokenOut: address, poolAmountIn: uint256, minAmountOut: uint256) -> uint256: nonpayable
     def isBound(t: address) -> bool: view
     def getNumTokens() -> uint256: view
 
 interface UniswapV2Factory:
     def getPair(tokenA: address, tokenB: address) -> address: view
 
-interface WrappedEth:
-    def deposit(): payable
+interface UniswapV2Pair:
+    def token0() -> address: view
+    def token1() -> address: view
+    def getReserves() -> (uint256, uint256, uint256): view
 
-event LPTokenMint:
+interface WrappedEth:
+    def withdraw(amount: uint256): nonpayable
+
+event LPTokenBurn:
     lptoken: address
     recipient: address
     liquidity: uint256
@@ -64,40 +59,55 @@ def __init__():
     self.feeAmount = 5 * 10 ** 15
 
 @internal
-def _enter2Balancer(_toBalancerPoolAddress: address, _fromTokenContractAddress: address, tokens2Trade: uint256) -> uint256:
-    assert BPool(_toBalancerPoolAddress).isBound(_fromTokenContractAddress), "Token not bound"
-    _response32: Bytes[32] = empty(Bytes[32])
-    if ERC20(_fromTokenContractAddress).allowance(self, _toBalancerPoolAddress) > 0:
-        _response32 = raw_call(
-            _fromTokenContractAddress,
-            concat(
-                APPROVE_MID,
-                convert(_toBalancerPoolAddress, bytes32),
-                convert(0, bytes32)
-            ),
-            max_outsize=32
-        )  # dev: failed approve
-        if len(_response32) > 0:
-            assert convert(_response32, bool), "Approve failed"  # dev: failed approve
-    _response32 = raw_call(
-        _fromTokenContractAddress,
+def safeApprove(_token: address, _spender: address, _value: uint256):
+    _response: Bytes[32] = raw_call(
+        _token,
         concat(
             APPROVE_MID,
-            convert(_toBalancerPoolAddress, bytes32),
-            convert(tokens2Trade, bytes32)
+            convert(_spender, bytes32),
+            convert(_value, bytes32)
         ),
         max_outsize=32
     )  # dev: failed approve
-    if len(_response32) > 0:
-        assert convert(_response32, bool), "Approve failed"  # dev: failed approve
-    poolTokensOut: uint256 = BPool(_toBalancerPoolAddress).joinswapExternAmountIn(_fromTokenContractAddress, tokens2Trade, 1)
-    assert poolTokensOut > 0, "Error in entering balancer pool"
-    return poolTokensOut
+    if len(_response) > 0:
+        assert convert(_response, bool), "Approve failed"  # dev: failed approve
 
-interface UniswapV2Pair:
-    def token0() -> address: view
-    def token1() -> address: view
-    def getReserves() -> (uint256, uint256, uint256): view
+@internal
+def safeTransfer(_token: address, _to: address, _value: uint256):
+    _response: Bytes[32] = raw_call(
+        _token,
+        concat(
+            TRANSFER_MID,
+            convert(_to, bytes32),
+            convert(_value, bytes32)
+        ),
+        max_outsize=32
+    )  # dev: failed transfer
+    if len(_response) > 0:
+        assert convert(_response, bool), "Transfer failed"  # dev: failed transfer
+
+@internal
+def safeTransferFrom(_token: address, _from: address, _to: address, _value: uint256):
+    _response: Bytes[32] = raw_call(
+        _token,
+        concat(
+            TRANSFERFROM_MID,
+            convert(_from, bytes32),
+            convert(_to, bytes32),
+            convert(_value, bytes32)
+        ),
+        max_outsize=32
+    )  # dev: failed transferFrom
+    if len(_response) > 0:
+        assert convert(_response, bool), "TransferFrom failed"  # dev: failed transferFrom
+
+@internal
+def _exitFromBalancer(_fromBalancerPoolAddress: address, _toTokenContractAddress: address, tokens2Trade: uint256) -> uint256:
+    assert BPool(_fromBalancerPoolAddress).isBound(_toTokenContractAddress), "Token not bound"
+    tokensOut: uint256 = BPool(_fromBalancerPoolAddress).exitswapPoolAmountIn(_toTokenContractAddress, tokens2Trade, 1)
+    assert tokensOut > 0, "Error in exiting balancer pool"
+    return tokensOut
+
 
 @internal
 @pure
@@ -146,36 +156,21 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, de
         return tokens2Trade
     _response32: Bytes[32] = empty(Bytes[32])
     if ERC20(fromToken).allowance(self, UNISWAPV2ROUTER02) > 0:
-        _response32 = raw_call(
-            fromToken,
-            concat(
-                APPROVE_MID,
-                convert(UNISWAPV2ROUTER02, bytes32),
-                convert(0, bytes32)
-            ),
-            max_outsize=32
-        )  # dev: failed approve
-        if len(_response32) > 0:
-            assert convert(_response32, bool), "Approve failed"  # dev: failed approve
-    _response32 = raw_call(
-        fromToken,
-        concat(
-            APPROVE_MID,
-            convert(UNISWAPV2ROUTER02, bytes32),
-            convert(tokens2Trade, bytes32)
-        ),
-        max_outsize=32
-    )  # dev: failed approve
-    if len(_response32) > 0:
-        assert convert(_response32, bool), "Approve failed"  # dev: failed approve
-    
-    addrBytes: Bytes[288] = concat(convert(tokens2Trade, bytes32), convert(0, bytes32), convert(160, bytes32), convert(self, bytes32), convert(deadline, bytes32), convert(2, bytes32), convert(fromToken, bytes32), convert(toToken, bytes32))
-    funcsig: Bytes[4] = SWAPETFT_MID
-    full_data: Bytes[292] = concat(funcsig, addrBytes)
-    
+        self.safeApprove(fromToken, UNISWAPV2ROUTER02, 0)
+    self.safeApprove(fromToken, UNISWAPV2ROUTER02, tokens2Trade)
     _response128: Bytes[128] = raw_call(
         UNISWAPV2ROUTER02,
-        full_data,
+        concat(
+            SWAPETFT_MID,
+            convert(tokens2Trade, bytes32),
+            convert(0, bytes32),
+            convert(160, bytes32),
+            convert(self, bytes32),
+            convert(deadline, bytes32),
+            convert(2, bytes32),
+            convert(fromToken, bytes32),
+            convert(toToken, bytes32)
+        ),
         max_outsize=128
     )
     tokenBought: uint256 = convert(slice(_response128, 96, 32), uint256)
@@ -183,15 +178,11 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, de
     return tokenBought
 
 @internal
-def _enter2BalancerViaUniswap(_toBalancerPoolAddress: address, _fromTokenContractAddress: address, _tokens2Trade: uint256) -> uint256:
-    tokens2Trade: uint256 = self._token2Token(_fromTokenContractAddress, WETH, _tokens2Trade, DEADLINE)
-    numTokens: uint256 = BPool(_toBalancerPoolAddress).getNumTokens()
-    
-    funcsig: Bytes[4] = GETCURRENTTOKENS_MID
-    
+def _exitFromBalancerViaUniswap(_fromBalancerPoolAddress: address, _toTokenContractAddress: address, _tokens2Trade: uint256) -> uint256:
+    numTokens: uint256 = BPool(_fromBalancerPoolAddress).getNumTokens()    
     _response320: Bytes[320] = raw_call(
-        _toBalancerPoolAddress,
-        funcsig,
+        _fromBalancerPoolAddress,
+        GETCURRENTTOKENS_MID,
         is_static_call=True,
         max_outsize=320
     )
@@ -201,68 +192,51 @@ def _enter2BalancerViaUniswap(_toBalancerPoolAddress: address, _fromTokenContrac
         if i == (numTokens - 1):
             break
     midTokenNumber: uint256 = self._getMidTokenNumber(WETH, tokens)
-    tokens2Trade = self._token2Token(WETH, tokens[midTokenNumber], tokens2Trade, DEADLINE)
-    tokens2Trade = self._enter2Balancer(_toBalancerPoolAddress, tokens[midTokenNumber], tokens2Trade)
+    tokens2Trade: uint256 = self._exitFromBalancer(_fromBalancerPoolAddress, tokens[midTokenNumber], _tokens2Trade)
+    
+    tokens2Trade = self._token2Token(tokens[midTokenNumber], WETH, tokens2Trade, DEADLINE)
+    tokens2Trade = self._token2Token(WETH, _toTokenContractAddress, tokens2Trade, DEADLINE)
     return tokens2Trade
 
 @external
 @payable
 @nonreentrant('lock')
-def investTokenForBalancerPoolToken(_token: address, _pair: address, amount: uint256, minPoolTokens: uint256, deadline: uint256=DEADLINE) -> uint256:
-    assert amount > 0, "Invalid input amount"
+def divestBalancerPoolTokenToToken(_token: address, _pair: address, bptAmount: uint256, minTokenAmount: uint256, deadline: uint256=DEADLINE) -> uint256:
+    assert bptAmount > 0, "Invalid input amount"
     assert block.timestamp <= deadline, "Expired"
     assert not self.paused, "Paused"
     assert BFactory(BALANCERFACTORY).isBPool(_pair), "!Balancer Pool"
     fee: uint256 = self.feeAmount
-    assert msg.value >= fee, "Insufficient fee"
-    send(self.feeAddress, fee)
-    msg_value: uint256 = msg.value
-    msg_value -= fee
+    if msg.value > fee:
+        send(self.feeAddress, fee)
+        send(msg.sender, msg.value - fee)
+    else:
+        assert msg.value == fee, "Insufficient fee"
+        send(self.feeAddress, fee)
+    
+    self.safeTransferFrom(_pair, msg.sender, self, bptAmount)
+
     token: address = _token
-    _response32: Bytes[32] = empty(Bytes[32])
-    if token == VETH or token == ZERO_ADDRESS:
-        if msg_value > amount:
-            send(msg.sender, msg_value - amount)
-        else:
-            assert msg_value >= amount, "Insufficient value"
-        WrappedEth(WETH).deposit(value=amount)
+    if _token == VETH or _token == ZERO_ADDRESS:
         token = WETH
-    else:
-        _response32 = raw_call(
-            token,
-            concat(
-                TRANSFERFROM_MID,
-                convert(msg.sender, bytes32),
-                convert(self, bytes32),
-                convert(amount, bytes32),
-            ),
-            max_outsize=32
-        )  # dev: failed transfer
-        if len(_response32) > 0:
-            assert convert(_response32, bool), "TransferFrom failed"  # dev: failed transfer
     isBound: bool = BPool(_pair).isBound(token)
-    balancerTokens: uint256 = 0
+    tokenAmount: uint256 = 0
     if (isBound):
-        balancerTokens = self._enter2Balancer(_pair, token, amount)
+        tokenAmount = self._exitFromBalancer(_pair, token, bptAmount)
     else:
-        balancerTokens = self._enter2BalancerViaUniswap(_pair, token, amount)
-    _response32 = raw_call(
-        _pair,
-        concat(
-            TRANSFER_MID,
-            convert(msg.sender, bytes32),
-            convert(balancerTokens, bytes32),
-        ),
-        max_outsize=32
-    )  # dev: failed transfer
-    if len(_response32) > 0:
-        assert convert(_response32, bool), "Transfer failed"  # dev: failed transfer
+        tokenAmount = self._exitFromBalancerViaUniswap(_pair, token, bptAmount)
 
-    assert balancerTokens >= minPoolTokens, "High Slippage"
+    if _token != token:
+        WrappedEth(WETH).withdraw(tokenAmount)
+        send(msg.sender, tokenAmount)
+    else:
+        self.safeTransfer(token, msg.sender, tokenAmount)
 
-    log LPTokenMint(_pair, msg.sender, balancerTokens)
+    assert tokenAmount >= minTokenAmount, "High Slippage"
 
-    return balancerTokens
+    log LPTokenBurn(_pair, msg.sender, bptAmount)
+
+    return tokenAmount
 
 # Admin functions
 @external

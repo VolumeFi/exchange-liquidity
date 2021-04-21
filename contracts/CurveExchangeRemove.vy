@@ -1,6 +1,6 @@
 # Copyright (C) 2021 VolumeFi Software, Inc.
 
-# @version ^0.2.0
+# @version 0.2.12
 
 interface ERC20:
     def balanceOf(addr: address) -> uint256: view
