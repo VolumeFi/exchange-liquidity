@@ -45,9 +45,6 @@ event NFLPModified:
 event Paused:
     paused: bool
 
-event FeeChanged:
-    newFee: uint256
-
 NONFUNGIBLEPOSITIONMANAGER: constant(address) = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88
 UNISWAPV3FACTORY: constant(address) = 0x1F98431c8aD98523631AE4a59f267346ea31F984
 
@@ -69,14 +66,12 @@ COLLECT_MID: constant(Bytes[4]) = method_id("collect((uint256,address,uint128,ui
 paused: public(bool)
 admin: public(address)
 feeAddress: public(address)
-feeAmount: public(uint256)
 
 @external
 def __init__():
     self.paused = False
     self.admin = msg.sender
     self.feeAddress = 0xf29399fB3311082d9F8e62b988cBA44a5a98ebeD
-    self.feeAmount = 5 * 10 ** 15
 
 @internal
 @pure
@@ -235,17 +230,11 @@ def addLiquidity(_tokenId: uint256, sender: address, uniV3Params: MintParams) ->
 def addLiquidityEthForUniV3(_tokenId: uint256, uniV3Params: MintParams):
     assert not self.paused, "Paused"
     assert convert(uniV3Params.token0, uint256) < convert(uniV3Params.token1, uint256), "Unsorted tokens"
-    fee: uint256 = self.feeAmount
-    if fee > 0:
-        assert msg.value > fee, "Insufficient fee"
-        send(self.feeAddress, fee)
-    
-    msg_value: uint256 = msg.value - fee
     if uniV3Params.token0 == WETH:
-        if msg_value > uniV3Params.amount0Desired:
-            send(msg.sender, msg_value - uniV3Params.amount0Desired)
+        if msg.value > uniV3Params.amount0Desired:
+            send(msg.sender, msg.value - uniV3Params.amount0Desired)
         else:
-            assert msg_value == uniV3Params.amount0Desired, "Eth not enough"
+            assert msg.value == uniV3Params.amount0Desired, "Eth not enough"
         WrappedEth(WETH).deposit(value=uniV3Params.amount0Desired)
         self.safeTransferFrom(uniV3Params.token1, msg.sender, self, uniV3Params.amount1Desired)
         amount0: uint256 = 0
@@ -262,10 +251,10 @@ def addLiquidityEthForUniV3(_tokenId: uint256, uniV3Params: MintParams):
             self.safeApprove(uniV3Params.token1, NONFUNGIBLEPOSITIONMANAGER, 0)
     else:
         assert uniV3Params.token1 == WETH, "Not Eth Pair"
-        if msg_value > uniV3Params.amount1Desired:
-            send(msg.sender, msg_value - uniV3Params.amount1Desired)
+        if msg.value > uniV3Params.amount1Desired:
+            send(msg.sender, msg.value - uniV3Params.amount1Desired)
         else:
-            assert msg_value == uniV3Params.amount1Desired, "Eth not enough"
+            assert msg.value == uniV3Params.amount1Desired, "Eth not enough"
         WrappedEth(WETH).deposit(value=uniV3Params.amount1Desired)
         self.safeTransferFrom(uniV3Params.token0, msg.sender, self, uniV3Params.amount0Desired)
         amount0: uint256 = 0
@@ -282,19 +271,11 @@ def addLiquidityEthForUniV3(_tokenId: uint256, uniV3Params: MintParams):
             self.safeApprove(uniV3Params.token1, NONFUNGIBLEPOSITIONMANAGER, 0)
 
 @external
-@payable
 @nonreentrant('lock')
 def addLiquidityForUniV3(_tokenId: uint256, uniV3Params: MintParams):
     assert not self.paused, "Paused"
     assert convert(uniV3Params.token0, uint256) < convert(uniV3Params.token1, uint256), "Unsorted tokens"
-    fee: uint256 = self.feeAmount
-    if msg.value > fee:
-        send(msg.sender, msg.value - fee)
-    else:
-        assert msg.value == fee, "Insufficient fee"
-    if fee > 0:
-        send(self.feeAddress, fee)
-    
+
     self.safeTransferFrom(uniV3Params.token0, msg.sender, self, uniV3Params.amount0Desired)
     self.safeTransferFrom(uniV3Params.token1, msg.sender, self, uniV3Params.amount1Desired)
 
@@ -311,18 +292,9 @@ def addLiquidityForUniV3(_tokenId: uint256, uniV3Params: MintParams):
         self.safeApprove(uniV3Params.token1, NONFUNGIBLEPOSITIONMANAGER, 0)
 
 @external
-@payable
 @nonreentrant('lock')
 def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
     assert _tokenId != 0, "Wrong Token ID"
-
-    fee: uint256 = self.feeAmount
-    if msg.value > fee:
-        send(msg.sender, msg.value - fee)
-    else:
-        assert msg.value == fee, "Insufficient fee"
-    if fee > 0:
-        send(self.feeAddress, fee)
 
     ERC721(NONFUNGIBLEPOSITIONMANAGER).transferFrom(msg.sender, self, _tokenId)
     
@@ -453,12 +425,6 @@ def pause(_paused: bool):
 def newAdmin(_admin: address):
     assert msg.sender == self.admin, "Not admin"
     self.admin = _admin
-
-@external
-def newFeeAmount(_feeAmount: uint256):
-    assert msg.sender == self.admin, "Not admin"
-    self.feeAmount = _feeAmount
-    log FeeChanged(_feeAmount)
 
 @external
 def newFeeAddress(_feeAddress: address):

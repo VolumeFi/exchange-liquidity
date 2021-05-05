@@ -23,7 +23,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     print(WETH.balanceOf(MyNonfungiblePositionManager))
     print(DAI.balanceOf(MyNonfungiblePositionManager))
     print("-----STEP1-----")
-    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(0, uniV3Params, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(0, uniV3Params, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -41,7 +41,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     DAI.approve(MyUniswapV3ExchangeAdd, 0xb8507a820728200000, {"from": accounts[0]})
     
     print("-----STEP2-----")
-    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(token_id_1, uniV3Params, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(token_id_1, uniV3Params, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -59,7 +59,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     DAI.approve(MyUniswapV3ExchangeAdd, 0xb8507a820728200000, {"from": accounts[0]})
     
     print("-----STEP3-----")
-    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(0, uniV3Params, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(0, uniV3Params, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -77,7 +77,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     DAI.approve(MyUniswapV3ExchangeAdd, 0xb8507a820728200000, {"from": accounts[0]})
     
     print("-----STEP4-----")
-    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(token_id_2, uniV3Params, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityForUniV3(token_id_2, uniV3Params, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -94,7 +94,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     uniV3Params = [DAI, WETH, 500, -100000, 100000, 0xb8507a820728200000,  0xde0b6b3a7640000, 0, 0, accounts[0], 2 ** 256 - 1]
     DAI.approve(MyUniswapV3ExchangeAdd, 0xb8507a820728200000, {"from": accounts[0]})
     print("-----STEP5-----")
-    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(0, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000 + 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(0, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -111,7 +111,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     DAI.approve(MyUniswapV3ExchangeAdd, 0xb8507a820728200000, {"from": accounts[0]})
     
     print("-----STEP6-----")
-    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(token_id_3, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000 + 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(token_id_3, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -128,7 +128,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     DAI.approve(MyUniswapV3ExchangeAdd, 0xb8507a820728200000, {"from": accounts[0]})
 
     print("-----STEP7-----")
-    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(0, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000 + 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(0, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -145,7 +145,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     DAI.approve(MyUniswapV3ExchangeAdd, 0xb8507a820728200000, {"from": accounts[0]})
 
     print("-----STEP8-----")
-    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(token_id_4, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000 + 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.addLiquidityEthForUniV3(token_id_4, uniV3Params, {'from': accounts[0], 'value': 0xde0b6b3a7640000})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -162,7 +162,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     modifyParams = [500, -100000, -50000, accounts[0], 2 ** 256 - 1]
     print("-----STEP9-----")
     MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeAdd, token_id_1, {'from': accounts[0]})
-    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_1, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_1, modifyParams, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -179,7 +179,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     modifyParams = [3000, -120000, -60000, accounts[0], 2 ** 256 - 1]
     print("-----STEP10-----")
     MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeAdd, token_id_2, {'from': accounts[0]})
-    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_2, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_2, modifyParams, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -196,7 +196,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     modifyParams = [3000, -120000, -60000, accounts[0], 2 ** 256 - 1]
     print("-----STEP11-----")
     MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeAdd, token_id_3, {'from': accounts[0]})
-    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_3, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_3, modifyParams, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -213,7 +213,7 @@ def test_main(DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Co
     modifyParams = [500, -120000, -60000, accounts[0], 2 ** 256 - 1]
     print("-----STEP12-----")
     MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeAdd, token_id_4, {'from': accounts[0]})
-    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_4, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_4, modifyParams, {'from': accounts[0]})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")

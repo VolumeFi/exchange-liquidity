@@ -48,7 +48,6 @@ Run ganache-cli mainnet fork
 
 ```bash
 ganache-cli --fork https://mainnet.infura.io/v3/#{YOUR_INFURA_KEY} -p 7545 -e 10000
-ganache-cli --fork https://rinkeby.infura.io/v3/#{YOUR_INFURA_KEY} -p 7545 -e 10000 # For UniswapV3 test, Other tests will be failed
 ```
 
 Run brownie test
@@ -58,7 +57,7 @@ brownie test tests/test_00_main_uniswap.py -s
 brownie test tests/test_01_main_sushiswap.py -s
 brownie test tests/test_02_main_curve.py -s
 brownie test tests/test_03_main_balancer.py -s
-brownie test tests/test_04_main_uniswap_v3.py -s # For UniswapV3 test on Rinkeby
+brownie test tests/test_04_main_uniswap_v3.py -s
 ```
 
 ## Deployment
@@ -71,7 +70,7 @@ brownie run deploy_curve_add.py --network mainnet # CurveExchangeAdd
 brownie run deploy_curve_remove.py --network mainnet # CurveExchangeRemove
 brownie run deploy_balancer_add.py --network mainnet # BalancerExchangeAdd
 brownie run deploy_balancer_remove.py --network mainnet # BalancerExchangeRemove
-brownie run deploy_univ3_add.py --network rinkeby # UniswapV3ExchangeAdd for Rinkeby
+brownie run deploy_univ3_add.py --network mainnet # UniswapV3ExchangeAdd
 ```
 
 ## Fees
