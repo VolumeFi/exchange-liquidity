@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import pytest, math
-from brownie import accounts, UniswapExchangeAdd, UniswapExchangeRemove, CurveExchangeAdd, CurveExchangeRemove, SushiswapExchangeAdd, SushiswapExchangeRemove, BalancerExchangeAdd, BalancerExchangeRemove, Contract
+from brownie import accounts, UniswapExchangeAdd, UniswapExchangeRemove, CurveExchangeAdd, CurveExchangeRemove, SushiswapExchangeAdd, SushiswapExchangeRemove, BalancerExchangeAdd, BalancerExchangeRemove, UniswapV3ExchangeAdd, Contract
 
 @pytest.fixture(scope="session")
 def MyUniswapExchangeAdd():
@@ -10,6 +10,10 @@ def MyUniswapExchangeAdd():
 @pytest.fixture(scope="session")
 def MyUniswapExchangeRemove():
     return UniswapExchangeRemove.deploy({'from':accounts[0]})
+
+@pytest.fixture(scope="session")
+def MyUniswapV3ExchangeAdd():
+    return UniswapV3ExchangeAdd.deploy({'from':accounts[0]})
 
 @pytest.fixture(scope="session")
 def MyCurveExchangeAdd():
