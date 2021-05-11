@@ -2,7 +2,11 @@
 Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token and develped in Vyper.
 
 ## Current Contracts deployed at:
-1. Uniswap Liquidity:
+1. Uniswapv3 Liquidity:
+  * Release1 Add: [0x8039722EE74dE2e37fDc39783b0a574Ea492DBAc](https://etherscan.io/address/0x8039722EE74dE2e37fDc39783b0a574Ea492DBAc)
+
+
+2. Uniswapv2 Liquidity:
   * Release1 Add: [0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0xFd8A61F94604aeD5977B31930b48f1a94ff3a195)
 
   * Release1 Remove: [0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92](https://etherscan.io/address/0x418915329226AE7fCcB20A2354BbbF0F6c22Bd92)
@@ -12,19 +16,19 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
   * Release2 Remove: [0x430f33353490b256D2fD7bBD9DaDF3BB7f905E78](https://etherscan.io/address/0x430f33353490b256D2fD7bBD9DaDF3BB7f905E78)
 
 
-2. Curve Liquidity Add via Uniswap
+3. Curve Liquidity Add via Uniswap
   * Add: [0x6fC92B10f8f3b2247CbAbF5843F9499719b0653C](https://etherscan.io/address/0x6fC92B10f8f3b2247CbAbF5843F9499719b0653C)
 
   * Remove: [0xb833600aEbcC3FAb87d0116a8b1716f2a335bB95](https://etherscan.io/address/0xb833600aEbcC3FAb87d0116a8b1716f2a335bB95)
 
 
-3. Sushiswap Liquidity Add via Sushiswap
+4. Sushiswap Liquidity Add via Sushiswap
   * Add: [0xe5826517134241278b6D372D1dA9f66D07190612](https://etherscan.io/address/0xe5826517134241278b6D372D1dA9f66D07190612)
 
   * Remove: [0x972b0Ff06c7c8e03468d841973cBB3578b6a7299](https://etherscan.io/address/0x972b0Ff06c7c8e03468d841973cBB3578b6a7299)
 
 
-4. Balancer Liquidity Add via Balancer
+5. Balancer Liquidity Add via Balancer
   * Add: [0xe05b4871fDB9eAC749f4B809f600B74dF5B2b118](https://etherscan.io/address/0xe05b4871fDB9eAC749f4B809f600B74dF5B2b118)
 
   * Remove: [](https://etherscan.io/address/)
