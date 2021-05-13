@@ -5,6 +5,7 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
 1. Uniswapv3 Liquidity:
   * Release1 Add: [0x8039722EE74dE2e37fDc39783b0a574Ea492DBAc](https://etherscan.io/address/0x8039722EE74dE2e37fDc39783b0a574Ea492DBAc)
 
+ * Release2 Add: [0xDA76A489b8148Ba6e409B04259CB14E75e5E9dd3](https://etherscan.io/address/0xDA76A489b8148Ba6e409B04259CB14E75e5E9dd3)
 
 2. Uniswapv2 Liquidity:
   * Release1 Add: [0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0xFd8A61F94604aeD5977B31930b48f1a94ff3a195)
