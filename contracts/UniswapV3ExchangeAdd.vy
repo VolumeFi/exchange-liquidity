@@ -29,6 +29,8 @@ struct SingleMintParams:
     fee: uint256
     tickLower: int128
     tickUpper: int128
+    sqrtPriceAX96: uint256
+    sqrtPriceBX96: uint256
     liquidityMin: uint256
     recipient: address
     deadline: uint256
@@ -492,8 +494,8 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, de
 # Quadratic equation solution for X'
 @internal
 @view
-def _getUserInForSqrtPriceX96(reserveIn: uint256, reserveOut: uint256, sqrtPriceX96: uint256, toInvest: uint256) -> uint256:
-    b: uint256 = reserveIn + (reserveOut * 997 / 1000 * 2 ** 96 / sqrtPriceX96 * 2 ** 96 / sqrtPriceX96) - toInvest * 997 / 1000
+def _getUserInForSqrtPriceX96(reserveIn: uint256, reserveOut: uint256, priceX96: uint256, toInvest: uint256) -> uint256:
+    b: uint256 = reserveIn + (reserveOut * 997 / 1000 * 2 ** 96 / priceX96) - toInvest * 997 / 1000
     return (self.uintSqrt(b * b + 4 * reserveIn * toInvest * 997 / 1000) - b) * 1000 / 1994
 
 @internal
@@ -529,6 +531,15 @@ def _getMidToken(midToken: address, token0: address, token1: address) -> address
         return token0
     else:
         return token1
+
+@internal
+@view
+def _getVirtualPriceX96(sqrtPriceAX96: uint256, sqrtPriceX96: uint256, sqrtPriceBX96: uint256) -> uint256:
+    ret: uint256 = (sqrtPriceBX96 - sqrtPriceX96) * 2 ** 96 / sqrtPriceBX96 * 2 ** 96 / sqrtPriceX96 * 2 ** 96 / (sqrtPriceX96 - sqrtPriceAX96)
+    if ret > 2 ** 160:
+        return 2 ** 160
+    else:
+        return ret
 
 @external
 @payable
@@ -617,12 +628,26 @@ def investTokenForUniPair(_token: address, amount: uint256, _tokenId: uint256, _
     )
     sqrtPriceX96 = convert(slice(_response224, 0, 32), uint256)
     assert sqrtPriceX96 != 0, "Pool does not initialized"
+    retAmount: uint256 = 0
     swapAmount: uint256 = 0
-    if convert(midToken, uint256) > convert(endToken, uint256):
-        swapAmount = self._getUserInForSqrtPriceX96(res0, res1, 2 ** 192 / sqrtPriceX96, toInvest)
+    if sqrtPriceX96 <= _uniV3Params.sqrtPriceAX96:
+        if convert(midToken, uint256) > convert(endToken, uint256):
+            swapAmount = toInvest
+    elif sqrtPriceX96 >= _uniV3Params.sqrtPriceBX96:
+        if convert(midToken, uint256) < convert(endToken, uint256):
+            swapAmount = toInvest
     else:
-        swapAmount = self._getUserInForSqrtPriceX96(res0, res1, sqrtPriceX96, toInvest)
-    retAmount: uint256 = self._token2Token(midToken, endToken, swapAmount, uniV3Params.deadline)
+        virtualPriceX96: uint256 = self._getVirtualPriceX96(_uniV3Params.sqrtPriceAX96, sqrtPriceX96, _uniV3Params.sqrtPriceBX96)
+        if convert(midToken, uint256) > convert(endToken, uint256):
+            swapAmount = self._getUserInForSqrtPriceX96(res0, res1, virtualPriceX96, toInvest)
+        else:
+            swapAmount = self._getUserInForSqrtPriceX96(res0, res1, 2 ** 192 / virtualPriceX96, toInvest)
+
+    if swapAmount > toInvest:
+        swapAmount = toInvest
+
+    if swapAmount > 0:
+        retAmount = self._token2Token(midToken, endToken, swapAmount, uniV3Params.deadline)
 
     if uniV3Params.token0 == midToken:
         uniV3Params.amount0Desired = toInvest - swapAmount
@@ -639,10 +664,8 @@ def investTokenForUniPair(_token: address, amount: uint256, _tokenId: uint256, _
     amount0 = uniV3Params.amount0Desired - amount0
     amount1 = uniV3Params.amount1Desired - amount1
     if amount0 > 0:
-        self.safeTransfer(uniV3Params.token0, msg.sender, amount0)
         self.safeApprove(uniV3Params.token0, NONFUNGIBLEPOSITIONMANAGER, 0)
     if amount1 > 0:
-        self.safeTransfer(uniV3Params.token1, msg.sender, amount1)
         self.safeApprove(uniV3Params.token1, NONFUNGIBLEPOSITIONMANAGER, 0)
 
 # Admin functions
