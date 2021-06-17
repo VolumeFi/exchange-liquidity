@@ -3,7 +3,7 @@
 import pytest
 import math
 
-def test_main(USDC, DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, Contract):
+def test_main(USDC, DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeAdd, MyUniswapV3ExchangeRemove, Contract):
     MyNonfungiblePositionManager = Contract.from_abi("NonfungiblePositionManager", "0xC36442b4a4522E871399CD717aBDD847Ab11FE88", [{"inputs":[{"internalType":"address","name":"_factory","type":"address"},{"internalType":"address","name":"_WETH9","type":"address"},{"internalType":"address","name":"_tokenDescriptor_","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"address","name":"owner","type":"address"},{"indexed":True,"internalType":"address","name":"approved","type":"address"},{"indexed":True,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"address","name":"owner","type":"address"},{"indexed":True,"internalType":"address","name":"operator","type":"address"},{"indexed":False,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":False,"internalType":"address","name":"recipient","type":"address"},{"indexed":False,"internalType":"uint256","name":"amount0","type":"uint256"},{"indexed":False,"internalType":"uint256","name":"amount1","type":"uint256"}],"name":"Collect","type":"event"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":False,"internalType":"uint128","name":"liquidity","type":"uint128"},{"indexed":False,"internalType":"uint256","name":"amount0","type":"uint256"},{"indexed":False,"internalType":"uint256","name":"amount1","type":"uint256"}],"name":"DecreaseLiquidity","type":"event"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":False,"internalType":"uint128","name":"liquidity","type":"uint128"},{"indexed":False,"internalType":"uint256","name":"amount0","type":"uint256"},{"indexed":False,"internalType":"uint256","name":"amount1","type":"uint256"}],"name":"IncreaseLiquidity","type":"event"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"address","name":"from","type":"address"},{"indexed":True,"internalType":"address","name":"to","type":"address"},{"indexed":True,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"DOMAIN_SEPARATOR","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PERMIT_TYPEHASH","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"WETH9","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint128","name":"amount0Max","type":"uint128"},{"internalType":"uint128","name":"amount1Max","type":"uint128"}],"name":"collect","outputs":[{"internalType":"uint256","name":"amount0","type":"uint256"},{"internalType":"uint256","name":"amount1","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"tokenA","type":"address"},{"internalType":"address","name":"tokenB","type":"address"},{"internalType":"uint24","name":"fee","type":"uint24"},{"internalType":"uint160","name":"sqrtPriceX96","type":"uint160"}],"name":"createAndInitializePoolIfNecessary","outputs":[{"internalType":"address","name":"pool","type":"address"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint128","name":"liquidity","type":"uint128"},{"internalType":"uint256","name":"amount0Min","type":"uint256"},{"internalType":"uint256","name":"amount1Min","type":"uint256"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"decreaseLiquidity","outputs":[{"internalType":"uint256","name":"amount0","type":"uint256"},{"internalType":"uint256","name":"amount1","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"factory","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"amount0Desired","type":"uint256"},{"internalType":"uint256","name":"amount1Desired","type":"uint256"},{"internalType":"uint256","name":"amount0Min","type":"uint256"},{"internalType":"uint256","name":"amount1Min","type":"uint256"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"increaseLiquidity","outputs":[{"internalType":"uint128","name":"liquidity","type":"uint128"},{"internalType":"uint256","name":"amount0","type":"uint256"},{"internalType":"uint256","name":"amount1","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"components":[{"internalType":"address","name":"token0","type":"address"},{"internalType":"address","name":"token1","type":"address"},{"internalType":"uint24","name":"fee","type":"uint24"},{"internalType":"int24","name":"tickLower","type":"int24"},{"internalType":"int24","name":"tickUpper","type":"int24"},{"internalType":"uint256","name":"amount0Desired","type":"uint256"},{"internalType":"uint256","name":"amount1Desired","type":"uint256"},{"internalType":"uint256","name":"amount0Min","type":"uint256"},{"internalType":"uint256","name":"amount1Min","type":"uint256"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"internalType":"structINonfungiblePositionManager.MintParams","name":"params","type":"tuple"}],"name":"mint","outputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint128","name":"liquidity","type":"uint128"},{"internalType":"uint256","name":"amount0","type":"uint256"},{"internalType":"uint256","name":"amount1","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"bytes[]","name":"data","type":"bytes[]"}],"name":"multicall","outputs":[{"internalType":"bytes[]","name":"results","type":"bytes[]"}],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"uint256","name":"deadline","type":"uint256"},{"internalType":"uint8","name":"v","type":"uint8"},{"internalType":"bytes32","name":"r","type":"bytes32"},{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"permit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"positions","outputs":[{"internalType":"uint96","name":"nonce","type":"uint96"},{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"token0","type":"address"},{"internalType":"address","name":"token1","type":"address"},{"internalType":"uint24","name":"fee","type":"uint24"},{"internalType":"int24","name":"tickLower","type":"int24"},{"internalType":"int24","name":"tickUpper","type":"int24"},{"internalType":"uint128","name":"liquidity","type":"uint128"},{"internalType":"uint256","name":"feeGrowthInside0LastX128","type":"uint256"},{"internalType":"uint256","name":"feeGrowthInside1LastX128","type":"uint256"},{"internalType":"uint128","name":"tokensOwed0","type":"uint128"},{"internalType":"uint128","name":"tokensOwed1","type":"uint128"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"uint256","name":"deadline","type":"uint256"},{"internalType":"uint8","name":"v","type":"uint8"},{"internalType":"bytes32","name":"r","type":"bytes32"},{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"selfPermit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"uint256","name":"expiry","type":"uint256"},{"internalType":"uint8","name":"v","type":"uint8"},{"internalType":"bytes32","name":"r","type":"bytes32"},{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"selfPermitAllowed","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"uint256","name":"expiry","type":"uint256"},{"internalType":"uint8","name":"v","type":"uint8"},{"internalType":"bytes32","name":"r","type":"bytes32"},{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"selfPermitAllowedIfNecessary","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"uint256","name":"deadline","type":"uint256"},{"internalType":"uint8","name":"v","type":"uint8"},{"internalType":"bytes32","name":"r","type":"bytes32"},{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"selfPermitIfNecessary","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amountMinimum","type":"uint256"},{"internalType":"address","name":"recipient","type":"address"}],"name":"sweepToken","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount0Owed","type":"uint256"},{"internalType":"uint256","name":"amount1Owed","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"uniswapV3MintCallback","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountMinimum","type":"uint256"},{"internalType":"address","name":"recipient","type":"address"}],"name":"unwrapWETH9","outputs":[],"stateMutability":"payable","type":"function"},{"stateMutability":"payable","type":"receive"}])
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
@@ -20,8 +20,8 @@ def test_main(USDC, DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeA
     UniswapV2Router02.swapETHForExactTokens(10000 * 10 ** 6, [WETH, USDC], accounts[0], 2 ** 256 - 1, {"from":accounts[0], "value": 5 * 10 ** 18})
     USDC.approve(MyUniswapV3ExchangeAdd, 10000 * 10 ** 6, {"from":accounts[0]})
     uniV3Params = [DAI, WETH, 3000, -120000, 120000, getSqrtRatioAtTick(-120000), getSqrtRatioAtTick(120000), 0, accounts[0], 2 ** 256 - 1]
-    tx = MyUniswapV3ExchangeAdd.investTokenForUniPair(USDC, 10000 * 10 ** 6, 0, uniV3Params, {"from":accounts[0], "value": 5 * 10 ** 15})
-    print(tx.info())
+    MyUniswapV3ExchangeAdd.investTokenForUniPair(USDC, 10000 * 10 ** 6, 0, uniV3Params, {"from":accounts[0], "value": 5 * 10 ** 15})
+    # print(tx.info())
     WETH.deposit({"from": accounts[0], "value": 50 * 10 ** 18})
     UniswapV2Router02.swapETHForExactTokens(100000 * 10 ** 18, [WETH, DAI], accounts[0], 2 ** 256 - 1, {"from":accounts[0], "value": 50 * 10 ** 18})
     uniV3Params = [DAI, WETH, 500, -100000, 100000, 0xb8507a820728200000,  0xde0b6b3a7640000, 0, 0, accounts[0], 2 ** 256 - 1]
@@ -213,7 +213,7 @@ def test_main(USDC, DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeA
     modifyParams = [3000, -120000, -60000, accounts[0], 2 ** 256 - 1]
     print("-----STEP11-----")
     MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeAdd, token_id_3, {'from': accounts[0]})
-    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_3, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    tx2 = MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_3, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -230,7 +230,7 @@ def test_main(USDC, DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeA
     modifyParams = [500, -120000, -60000, accounts[0], 2 ** 256 - 1]
     print("-----STEP12-----")
     MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeAdd, token_id_4, {'from': accounts[0]})
-    MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_4, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    tx1 = MyUniswapV3ExchangeAdd.modifyPositionForUniV3NFLP(token_id_4, modifyParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
     print("NFT Balance")
     print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
     print("Eth Balance")
@@ -239,6 +239,84 @@ def test_main(USDC, DAI, WETH, accounts, UniswapV2Router02, MyUniswapV3ExchangeA
     print(WETH.balanceOf(accounts[0]))
     print("DAI Balance")
     print(DAI.balanceOf(accounts[0]))
+    print("Contract Balances")
+    print(MyNonfungiblePositionManager.balance())
+    print(WETH.balanceOf(MyUniswapV3ExchangeAdd))
+    print(DAI.balanceOf(MyUniswapV3ExchangeAdd))
+
+    liq = tx1.events['IncreaseLiquidity']['liquidity']
+    removeParams = [liq // 2, accounts[0], 2 ** 256 - 1]
+    token_id = MyNonfungiblePositionManager.tokenOfOwnerByIndex(accounts[0], MyNonfungiblePositionManager.balanceOf(accounts[0]) - 1)
+    print("-----STEP13-----")
+    MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeRemove, token_id, {'from': accounts[0]})
+    tx = MyUniswapV3ExchangeRemove.removeLiquidityEthFromUniV3NFLP(token_id, removeParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    print("NFT Balance")
+    print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
+    print("Eth Balance")
+    print(accounts[0].balance())
+    print("WETH Balance")
+    print(WETH.balanceOf(accounts[0]))
+    print("DAI Balance")
+    print(DAI.balanceOf(accounts[0]))
+    print("Contract Balances")
+    print(MyNonfungiblePositionManager.balance())
+    print(WETH.balanceOf(MyUniswapV3ExchangeAdd))
+    print(DAI.balanceOf(MyUniswapV3ExchangeAdd))
+
+    removeParams = [liq - liq // 2, accounts[0], 2 ** 256 - 1]
+    token_id = MyNonfungiblePositionManager.tokenOfOwnerByIndex(accounts[0], MyNonfungiblePositionManager.balanceOf(accounts[0]) - 1)
+    print("-----STEP14-----")
+    MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeRemove, token_id, {'from': accounts[0]})
+    MyUniswapV3ExchangeRemove.removeLiquidityFromUniV3NFLP(token_id, removeParams, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    print("NFT Balance")
+    print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
+    print("Eth Balance")
+    print(accounts[0].balance())
+    print("WETH Balance")
+    print(WETH.balanceOf(accounts[0]))
+    print("DAI Balance")
+    print(DAI.balanceOf(accounts[0]))
+    print("Contract Balances")
+    print(MyNonfungiblePositionManager.balance())
+    print(WETH.balanceOf(MyUniswapV3ExchangeAdd))
+    print(DAI.balanceOf(MyUniswapV3ExchangeAdd))
+
+    liq = tx2.events['IncreaseLiquidity']['liquidity']
+    removeParams = [liq // 2, accounts[0], 2 ** 256 - 1]
+    token_id = MyNonfungiblePositionManager.tokenOfOwnerByIndex(accounts[0], MyNonfungiblePositionManager.balanceOf(accounts[0]) - 1)
+    print("-----STEP15-----")
+    MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeRemove, token_id, {'from': accounts[0]})
+    MyUniswapV3ExchangeRemove.divestUniV3NFLPToToken(token_id, "0x0000000000000000000000000000000000000000", removeParams, 0, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    print("NFT Balance")
+    print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
+    print("Eth Balance")
+    print(accounts[0].balance())
+    print("WETH Balance")
+    print(WETH.balanceOf(accounts[0]))
+    print("DAI Balance")
+    print(DAI.balanceOf(accounts[0]))
+    print("USDC Balance")
+    print(USDC.balanceOf(accounts[0]))
+    print("Contract Balances")
+    print(MyNonfungiblePositionManager.balance())
+    print(WETH.balanceOf(MyUniswapV3ExchangeAdd))
+    print(DAI.balanceOf(MyUniswapV3ExchangeAdd))
+
+    removeParams = [liq - liq // 2, accounts[0], 2 ** 256 - 1]
+    token_id = MyNonfungiblePositionManager.tokenOfOwnerByIndex(accounts[0], MyNonfungiblePositionManager.balanceOf(accounts[0]) - 1)
+    print("-----STEP16-----")
+    MyNonfungiblePositionManager.approve(MyUniswapV3ExchangeRemove, token_id, {'from': accounts[0]})
+    MyUniswapV3ExchangeRemove.divestUniV3NFLPToToken(token_id, USDC, removeParams, 0, {'from': accounts[0], 'value': 5 * 10 ** 15})
+    print("NFT Balance")
+    print(MyNonfungiblePositionManager.balanceOf(accounts[0]))
+    print("Eth Balance")
+    print(accounts[0].balance())
+    print("WETH Balance")
+    print(WETH.balanceOf(accounts[0]))
+    print("DAI Balance")
+    print(DAI.balanceOf(accounts[0]))
+    print("USDC Balance")
+    print(USDC.balanceOf(accounts[0]))
     print("Contract Balances")
     print(MyNonfungiblePositionManager.balance())
     print(WETH.balanceOf(MyUniswapV3ExchangeAdd))
