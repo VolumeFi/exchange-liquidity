@@ -78,6 +78,7 @@ brownie run deploy_curve_remove.py --network mainnet # CurveExchangeRemove
 brownie run deploy_balancer_add.py --network mainnet # BalancerExchangeAdd
 brownie run deploy_balancer_remove.py --network mainnet # BalancerExchangeRemove
 brownie run deploy_univ3_add.py --network mainnet # UniswapV3ExchangeAdd
+brownie run deploy_univ3_remove.py --network mainnet # UniswapV3ExchangeRemove
 ```
 
 ## Fees
