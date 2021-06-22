@@ -45,9 +45,6 @@ struct ModifyParams:
 interface ERC20:
     def allowance(_owner: address, _spender: address) -> uint256: view
 
-interface ERC721:
-    def transferFrom(_from: address, _to: address, _tokenId: uint256): payable
-
 interface NonfungiblePositionManager:
     def burn(tokenId: uint256): payable
 
@@ -346,7 +343,6 @@ def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
     else:
         assert msg.value == fee, "Insufficient fee"
     send(self.feeAddress, fee)
-    ERC721(NONFUNGIBLEPOSITIONMANAGER).transferFrom(msg.sender, self, _tokenId)
     
     _response384: Bytes[384] = raw_call(
         NONFUNGIBLEPOSITIONMANAGER,

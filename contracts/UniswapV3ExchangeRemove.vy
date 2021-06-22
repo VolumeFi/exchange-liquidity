@@ -8,9 +8,6 @@ struct RemoveParams:
 interface ERC20:
     def allowance(owner: address, spender: address) -> uint256: view
 
-interface ERC721:
-    def transferFrom(_from: address, _to: address, _tokenId: uint256): payable
-
 interface NonfungiblePositionManager:
     def burn(tokenId: uint256): payable
 
@@ -218,8 +215,6 @@ def removeLiquidityFromUniV3NFLP(_tokenId: uint256, _removeParams: RemoveParams,
     if fee > 0:
         send(self.feeAddress, fee)
 
-    ERC721(NONFUNGIBLEPOSITIONMANAGER).transferFrom(msg.sender, self, _tokenId)
-
     self.removeLiquidity(_tokenId, _removeParams, isBurn)
 
 @external
@@ -235,8 +230,6 @@ def removeLiquidityEthFromUniV3NFLP(_tokenId: uint256, _removeParams: RemovePara
         assert msg.value == fee, "Insufficient fee"
     if fee > 0:
         send(self.feeAddress, fee)
-
-    ERC721(NONFUNGIBLEPOSITIONMANAGER).transferFrom(msg.sender, self, _tokenId)
 
     token0: address = ZERO_ADDRESS
     token1: address = ZERO_ADDRESS
