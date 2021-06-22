@@ -9,6 +9,8 @@ Liquidity Exchange and Add to any listed Pool with XXX/ETH from any ERC20 token 
 
  * Release2 Swapv2Addv3: [0xE76427463FdBacdD0e794e5Ea30269f30Dd9B8eB](https://etherscan.io/address/0xE76427463FdBacdD0e794e5Ea30269f30Dd9B8eB)
 
+ * Release1 v3Remove: [0x66C7fAFe42cC9B1aba0cc979F216B3bbF80ff23B](https://etherscan.io/address/0x66C7fAFe42cC9B1aba0cc979F216B3bbF80ff23B)
+
 2. Uniswapv2 Liquidity:
   * Release1 Add: [0xFd8A61F94604aeD5977B31930b48f1a94ff3a195](https://etherscan.io/address/0xFd8A61F94604aeD5977B31930b48f1a94ff3a195)
 
@@ -78,6 +80,7 @@ brownie run deploy_curve_remove.py --network mainnet # CurveExchangeRemove
 brownie run deploy_balancer_add.py --network mainnet # BalancerExchangeAdd
 brownie run deploy_balancer_remove.py --network mainnet # BalancerExchangeRemove
 brownie run deploy_univ3_add.py --network mainnet # UniswapV3ExchangeAdd
+brownie run deploy_univ3_remove.py --network mainnet # UniswapV3ExchangeRemove
 ```
 
 ## Fees
