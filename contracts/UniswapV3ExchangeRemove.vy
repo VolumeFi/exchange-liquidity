@@ -156,7 +156,7 @@ def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, de
     return tokenBought
 
 @internal
-def removeLiquidity(_tokenId: uint256, _removeParams: RemoveParams, _isBurn: bool=True, _recipient: address=ZERO_ADDRESS) -> (address, address, uint256, uint256):
+def removeLiquidity(_tokenId: uint256, _removeParams: RemoveParams, _isBurn: bool=False, _recipient: address=ZERO_ADDRESS) -> (address, address, uint256, uint256):
     _response384: Bytes[384] = raw_call(
         NONFUNGIBLEPOSITIONMANAGER,
         concat(
