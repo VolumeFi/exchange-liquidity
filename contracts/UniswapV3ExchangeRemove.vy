@@ -20,6 +20,7 @@ interface ERC20:
 
 interface NonfungiblePositionManager:
     def burn(tokenId: uint256): payable
+    def ownerOf(tokenId: uint256) -> address: view
 
 interface UniswapV2Factory:
     def getPair(tokenA: address, tokenB: address) -> address: view
@@ -215,8 +216,8 @@ def removeLiquidity(_tokenId: uint256, _removeParams: RemoveParams, _isBurn: boo
 @payable
 @nonreentrant('lock')
 def removeLiquidityFromUniV3NFLP(_tokenId: uint256, _removeParams: RemoveParams, isBurn: bool=True):
-    assert _tokenId != 0, "Wrong Token ID"
-
+    assert NonfungiblePositionManager(NONFUNGIBLEPOSITIONMANAGER).ownerOf(_tokenId) == msg.sender, "Wrong token id"
+    assert not self.paused, "Paused"
     fee: uint256 = self.feeAmount
     if msg.value > fee:
         send(msg.sender, msg.value - fee)
@@ -231,8 +232,8 @@ def removeLiquidityFromUniV3NFLP(_tokenId: uint256, _removeParams: RemoveParams,
 @payable
 @nonreentrant('lock')
 def removeLiquidityEthFromUniV3NFLP(_tokenId: uint256, _removeParams: RemoveParams, isBurn: bool=True):
-    assert _tokenId != 0, "Wrong Token ID"
-
+    assert NonfungiblePositionManager(NONFUNGIBLEPOSITIONMANAGER).ownerOf(_tokenId) == msg.sender, "Wrong token id"
+    assert not self.paused, "Paused"
     fee: uint256 = self.feeAmount
     if msg.value > fee:
         send(msg.sender, msg.value - fee)
@@ -261,6 +262,7 @@ def removeLiquidityEthFromUniV3NFLP(_tokenId: uint256, _removeParams: RemovePara
 @payable
 @nonreentrant('lock')
 def divestUniV3NFLPToToken(_tokenId: uint256, _token: address, _removeParams: RemoveParams, minTokenAmount: uint256, isBurn: bool=True, deadline: uint256=MAX_UINT256) -> uint256:
+    assert NonfungiblePositionManager(NONFUNGIBLEPOSITIONMANAGER).ownerOf(_tokenId) == msg.sender, "Wrong token id"
     assert not self.paused, "Paused"
     fee: uint256 = self.feeAmount
     msg_value: uint256 = msg.value
