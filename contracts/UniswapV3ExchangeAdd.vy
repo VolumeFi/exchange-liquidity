@@ -43,19 +43,10 @@ struct ModifyParams:
     deadline: uint256
 
 interface ERC20:
-    def allowance(_owner: address, _spender: address) -> uint256: view
+    def balanceOf(_owner: address) -> uint256: view
 
 interface NonfungiblePositionManager:
     def burn(tokenId: uint256): payable
-
-interface UniswapV2Factory:
-    def getPair(tokenA: address, tokenB: address) -> address: view
-
-interface UniswapV2Pair:
-    def token0() -> address: view
-    def token1() -> address: view
-    def getReserves() -> (uint256, uint256, uint256): view
-    def mint(to: address) -> uint256: nonpayable
 
 interface WrappedEth:
     def deposit(): payable
@@ -82,8 +73,7 @@ event FeeChanged:
 NONFUNGIBLEPOSITIONMANAGER: constant(address) = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88
 UNISWAPV3FACTORY: constant(address) = 0x1F98431c8aD98523631AE4a59f267346ea31F984
 
-UNISWAPV2FACTORY: constant(address) = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f
-UNISWAPV2ROUTER02: constant(address) = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+SWAPROUTER: constant(address) = 0xE592427A0AEce92De3Edee1F18E0157C05861564
 
 VETH: constant(address) = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
 WETH: constant(address) = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
@@ -99,7 +89,7 @@ POSITIONS_MID: constant(Bytes[4]) = method_id("positions(uint256)")
 INCREASELIQUIDITY_MID: constant(Bytes[4]) = method_id("increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))")
 DECREASELIQUIDITY_MID: constant(Bytes[4]) = method_id("decreaseLiquidity((uint256,uint128,uint256,uint256,uint256))")
 COLLECT_MID: constant(Bytes[4]) = method_id("collect((uint256,address,uint128,uint128))")
-SWAPETFT_MID: constant(Bytes[4]) = method_id("swapExactTokensForTokens(uint256,uint256,address[],address,uint256)")
+EIS_MID: constant(Bytes[4]) = method_id("exactInputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160))")
 
 paused: public(bool)
 admin: public(address)
@@ -410,7 +400,7 @@ def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
         )
         sqrtPriceX96 = convert(slice(_response224, 0, 32), uint256)
         if sqrtPriceX96 == 0:
-            sqrtPriceX96 = 2 ** 96 * self.uintSqrt(amount1) / self.uintSqrt(amount1)
+            sqrtPriceX96 = 2 ** 96 * self.uintSqrt(amount0) / self.uintSqrt(amount1)
 
     _response32 = raw_call(
         NONFUNGIBLEPOSITIONMANAGER,
@@ -461,81 +451,202 @@ def modifyPositionForUniV3NFLP(_tokenId: uint256, modifyParams: ModifyParams):
     log NFLPModified(_tokenId, tokenId)
 
 @internal
-def _token2Token(fromToken: address, toToken: address, tokens2Trade: uint256, deadline: uint256) -> uint256:
+def _getMaxFeeLevel(fromToken: address, toToken: address) -> uint256:
+    maxFee: uint256 = 0
+    _response: Bytes[32] = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(fromToken, bytes32),
+            convert(toToken, bytes32),
+            convert(500, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_500: address = convert(convert(_response, bytes32), address)
+    bal_500: uint256 = 0
+    if pool_500 != ZERO_ADDRESS:
+        maxFee = 500
+        bal_500 = ERC20(toToken).balanceOf(pool_500)
+    _response = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(fromToken, bytes32),
+            convert(toToken, bytes32),
+            convert(3000, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_3000: address = convert(convert(_response, bytes32), address)
+    bal_3000: uint256 = 0
+    if pool_3000 != ZERO_ADDRESS:
+        bal_3000 = ERC20(toToken).balanceOf(pool_500)
+        if maxFee == 0 or bal_3000 > bal_500:
+            maxFee = 3000
+    _response = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(fromToken, bytes32),
+            convert(toToken, bytes32),
+            convert(10000, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_10000: address = convert(convert(_response, bytes32), address)
+    bal_10000: uint256 = 0
+    if pool_10000 != ZERO_ADDRESS:
+        bal_10000 = ERC20(fromToken).balanceOf(pool_10000)
+        if maxFee == 0 or (bal_10000 > bal_3000 and bal_10000 > bal_500):
+            maxFee = 10000
+    assert maxFee != 0
+    return maxFee
+
+@internal
+def _token2Token(fromToken: address, toToken: address, feeLevel: uint256, tokens2Trade: uint256, deadline: uint256) -> uint256:
     if fromToken == toToken:
         return tokens2Trade
-    self.safeApprove(fromToken, UNISWAPV2ROUTER02, tokens2Trade)
-    _response: Bytes[128] = raw_call(
-        UNISWAPV2ROUTER02,
+    self.safeApprove(fromToken, SWAPROUTER, tokens2Trade)
+    _response: Bytes[32] = raw_call(
+        SWAPROUTER,
         concat(
-            SWAPETFT_MID,
-            convert(tokens2Trade, bytes32),
-            convert(0, bytes32),
-            convert(160, bytes32),
+            EIS_MID,
+            convert(fromToken, bytes32),
+            convert(toToken, bytes32),
+            convert(feeLevel, bytes32),
             convert(self, bytes32),
             convert(deadline, bytes32),
-            convert(2, bytes32),
-            convert(fromToken, bytes32),
-            convert(toToken, bytes32)
+            convert(tokens2Trade, bytes32),
+            convert(0, bytes32),
+            convert(0, bytes32)
         ),
-        max_outsize=128
+        max_outsize=32
     )
-    tokenBought: uint256 = convert(slice(_response, 96, 32), uint256)
-    self.safeApprove(fromToken, UNISWAPV2ROUTER02, 0)
+    tokenBought: uint256 = convert(_response, uint256)
+    self.safeApprove(fromToken, SWAPROUTER, 0)
     assert tokenBought > 0, "Error Swapping Token"
     return tokenBought
 
-# (X + fX') * (Y - Y') = X * Y
-# Y' / (X_toinvest - X') = p^2 = P
-# Quadratic equation solution for X'
-@internal
-@view
-def _getUserInForSqrtPriceX96(reserveIn: uint256, reserveOut: uint256, priceX96: uint256, toInvest: uint256) -> uint256:
-    b: uint256 = reserveIn + (reserveOut * 997 / 1000 * 2 ** 96 / priceX96) - toInvest * 997 / 1000
-    return (self.uintSqrt(b * b + 4 * reserveIn * toInvest * 997 / 1000) - b) * 1000 / 1994
-
 @internal
 @pure
-def _getPairTokens(pair: address) -> (address, address):
-    token0: address = UniswapV2Pair(pair).token0()
-    token1: address = UniswapV2Pair(pair).token1()
-    return (token0, token1)
+def _getUserInForSqrtPriceX96(sqrtPriceAX96: uint256, sqrtPriceBX96: uint256, sqrtPriceX96: uint256, toInvest: uint256) -> uint256:
+    if sqrtPriceBX96 > sqrtPriceAX96:
+        return toInvest * sqrtPriceBX96 / (sqrtPriceX96 * (sqrtPriceBX96 - sqrtPriceX96) / (sqrtPriceX96 - sqrtPriceAX96) + sqrtPriceBX96)
+    else:
+        return toInvest * sqrtPriceX96 / (sqrtPriceX96 + sqrtPriceAX96 * (sqrtPriceX96 - sqrtPriceBX96) / (sqrtPriceAX96 - sqrtPriceX96))
 
 @internal
 @view
-def _getLiquidityInPool(midToken: address, pair: address) -> uint256:
-    res0: uint256 = 0
-    res1: uint256 = 0
-    token0: address = ZERO_ADDRESS
-    token1: address = ZERO_ADDRESS
-    blockTimestampLast: uint256 = 0
-    (res0, res1, blockTimestampLast) = UniswapV2Pair(pair).getReserves()
-    (token0, token1) = self._getPairTokens(pair)
-    if token0 == midToken:
-        return res0
-    else:
-        return res1
+def _getMidToken(midToken: address, token0: address, token1: address) -> (address, uint256):
+    amount0: uint256 = 0
+    fee0: uint256 = 500
+    _response: Bytes[32] = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(midToken, bytes32),
+            convert(token0, bytes32),
+            convert(500, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_500: address = convert(convert(_response, bytes32), address)
+    if pool_500 != ZERO_ADDRESS:
+        amount0 = ERC20(midToken).balanceOf(pool_500)
+    _response = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(midToken, bytes32),
+            convert(token0, bytes32),
+            convert(3000, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_3000: address = convert(convert(_response, bytes32), address)
+    if pool_3000 != ZERO_ADDRESS:
+        amount: uint256 = ERC20(midToken).balanceOf(pool_3000)
+        if amount > amount0:
+            amount0 = amount
+            fee0 = 3000
+    _response = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(midToken, bytes32),
+            convert(token0, bytes32),
+            convert(10000, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_10000: address = convert(convert(_response, bytes32), address)
+    if pool_10000 != ZERO_ADDRESS:
+        amount: uint256 = ERC20(midToken).balanceOf(pool_3000)
+        if amount > amount0:
+            amount0 = amount
+            fee0 = 10000
 
-@internal
-@view
-def _getMidToken(midToken: address, token0: address, token1: address) -> address:
-    pair0: address = UniswapV2Factory(UNISWAPV2FACTORY).getPair(midToken, token0)
-    pair1: address = UniswapV2Factory(UNISWAPV2FACTORY).getPair(midToken, token1)
-    eth0: uint256 = self._getLiquidityInPool(midToken, pair0)
-    eth1: uint256 = self._getLiquidityInPool(midToken, pair1)
-    if eth0 > eth1:
-        return token0
+    amount1: uint256 = 0
+    fee1: uint256 = 500
+    _response = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(midToken, bytes32),
+            convert(token1, bytes32),
+            convert(500, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_500 = convert(convert(_response, bytes32), address)
+    if pool_500 != ZERO_ADDRESS:
+        amount1 = ERC20(midToken).balanceOf(pool_500)
+    _response = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(midToken, bytes32),
+            convert(token1, bytes32),
+            convert(3000, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_3000 = convert(convert(_response, bytes32), address)
+    if pool_3000 != ZERO_ADDRESS:
+        amount: uint256 = ERC20(midToken).balanceOf(pool_3000)
+        if amount > amount1:
+            amount1 = amount
+            fee1 = 3000
+    _response = raw_call(
+        UNISWAPV3FACTORY,
+        concat(
+            GETPOOL_MID,
+            convert(midToken, bytes32),
+            convert(token1, bytes32),
+            convert(10000, bytes32)
+        ),
+        max_outsize=32,
+        is_static_call=True
+    )
+    pool_10000 = convert(convert(_response, bytes32), address)
+    if pool_10000 != ZERO_ADDRESS:
+        amount: uint256 = ERC20(midToken).balanceOf(pool_10000)
+        if amount > amount1:
+            amount1 = amount
+            fee1 = 10000
+    if amount0 > amount1:
+        return (token0, fee0)
     else:
-        return token1
-
-@internal
-@view
-def _getVirtualPriceX96(sqrtPriceAX96: uint256, sqrtPriceX96: uint256, sqrtPriceBX96: uint256) -> uint256:
-    ret: uint256 = (sqrtPriceBX96 - sqrtPriceX96) * 2 ** 96 / sqrtPriceBX96 * 2 ** 96 / sqrtPriceX96 * 2 ** 96 / (sqrtPriceX96 - sqrtPriceAX96)
-    if ret > 2 ** 160:
-        return 2 ** 160
-    else:
-        return ret
+        return (token1, fee1)
 
 @external
 @payable
@@ -582,24 +693,20 @@ def investTokenForUniPair(_token: address, amount: uint256, _tokenId: uint256, _
         if token == WETH:
             toInvest = amount
         elif token != uniV3Params.token0 and token != uniV3Params.token1:
-            toInvest = self._token2Token(token, WETH, amount, uniV3Params.deadline)
+            maxFeeLevel:uint256 = self._getMaxFeeLevel(token, WETH)
+            toInvest = self._token2Token(token, WETH, maxFeeLevel, amount, uniV3Params.deadline)
         else:
             midToken = token
             toInvest = amount
     if uniV3Params.token0 != WETH and uniV3Params.token1 != WETH and token != uniV3Params.token0 and token != uniV3Params.token1:
-        midToken = self._getMidToken(WETH, uniV3Params.token0, uniV3Params.token1)
-        toInvest = self._token2Token(WETH, midToken, toInvest, uniV3Params.deadline)
+        maxFeeLevel:uint256 = 0
+        (midToken, maxFeeLevel) = self._getMidToken(WETH, uniV3Params.token0, uniV3Params.token1)
+        toInvest = self._token2Token(WETH, midToken, maxFeeLevel, toInvest, uniV3Params.deadline)
 
-    res0: uint256 = 0
-    res1: uint256 = 0
-    blockTimestampLast: uint256 = 0
-    pair: address = UniswapV2Factory(UNISWAPV2FACTORY).getPair(uniV3Params.token0, uniV3Params.token1)
     endToken: address = ZERO_ADDRESS
     if midToken == uniV3Params.token0:
-        (res0, res1, blockTimestampLast) = UniswapV2Pair(pair).getReserves()
         endToken = uniV3Params.token1
     else:
-        (res1, res0, blockTimestampLast) = UniswapV2Pair(pair).getReserves()
         endToken = uniV3Params.token0
 
     sqrtPriceX96: uint256 = 0
@@ -633,17 +740,16 @@ def investTokenForUniPair(_token: address, amount: uint256, _tokenId: uint256, _
         if convert(midToken, uint256) < convert(endToken, uint256):
             swapAmount = toInvest
     else:
-        virtualPriceX96: uint256 = self._getVirtualPriceX96(_uniV3Params.sqrtPriceAX96, sqrtPriceX96, _uniV3Params.sqrtPriceBX96)
-        if convert(midToken, uint256) > convert(endToken, uint256):
-            swapAmount = self._getUserInForSqrtPriceX96(res0, res1, virtualPriceX96, toInvest)
+        if convert(midToken, uint256) < convert(endToken, uint256):
+            swapAmount = self._getUserInForSqrtPriceX96(_uniV3Params.sqrtPriceAX96, _uniV3Params.sqrtPriceBX96, sqrtPriceX96, toInvest)
         else:
-            swapAmount = self._getUserInForSqrtPriceX96(res0, res1, 2 ** 192 / virtualPriceX96, toInvest)
+            swapAmount = self._getUserInForSqrtPriceX96(_uniV3Params.sqrtPriceBX96, _uniV3Params.sqrtPriceAX96, sqrtPriceX96, toInvest)
 
     if swapAmount > toInvest:
         swapAmount = toInvest
 
     if swapAmount > 0:
-        retAmount = self._token2Token(midToken, endToken, swapAmount, uniV3Params.deadline)
+        retAmount = self._token2Token(midToken, endToken, uniV3Params.fee, swapAmount, uniV3Params.deadline)
 
     if uniV3Params.token0 == midToken:
         uniV3Params.amount0Desired = toInvest - swapAmount
@@ -660,8 +766,10 @@ def investTokenForUniPair(_token: address, amount: uint256, _tokenId: uint256, _
     amount0 = uniV3Params.amount0Desired - amount0
     amount1 = uniV3Params.amount1Desired - amount1
     if amount0 > 0:
+        self.safeTransfer(uniV3Params.token0, msg.sender, amount0)
         self.safeApprove(uniV3Params.token0, NONFUNGIBLEPOSITIONMANAGER, 0)
     if amount1 > 0:
+        self.safeTransfer(uniV3Params.token1, msg.sender, amount1)
         self.safeApprove(uniV3Params.token1, NONFUNGIBLEPOSITIONMANAGER, 0)
 
 # Admin functions
